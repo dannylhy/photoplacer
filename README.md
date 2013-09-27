@@ -1,4 +1,4 @@
 photoplacer
 ===========
 
-Web and mobile to get the best picture locations
+Web and mobile app (with backend) to get the best picture locations
