@@ -8,6 +8,8 @@ $( document ).ready(function initialize() {
     var map;   
     var markersArray = [];
 	var level = 0;
+	var previd = 0;
+	var photos = [];
 	
 function clearOverlays() {
   for (var i = 0; i < markersArray.length; i++ ) {
@@ -86,11 +88,11 @@ addMapMarker(markers[j]);
     
      function getZoomMapMarkers(id) {
    $.ajax({
-       url: "http://dev.m.gatech.edu/d/rrao38/w/photoplacer/c/api/map/"+id+"/zoom",
+       url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/"+id+"/zoom",
  context: document.body,
  success: function(data) {
  markers = jQuery.parseJSON(data);   
-      
+      previd = id;
 createMapMarker(markers);
  }
 }); 
@@ -98,10 +100,16 @@ createMapMarker(markers);
  
       function getPopularPhotos(id) {
    $.ajax({
-       url: "",
+       url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/"+previd+"/zoom/"+id,
  context: document.body,
  success: function(data) {
- 
+		photos = jQuery.parseJSON(data);
+	
+		window.location = "photo.html" ;
+		for(i=0;i<photos.length; i++){
+		document.write("<img src=\"" + photos[i].url + "\"> <p></p>");
+		//$("#photo_list").html("<img src=\"" + photos[i].url + "\"> <p>hello test text</p>");
+		}
  }
 }); 
  }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang = "en">
 <head>
-	<title>PhotoPlacer Home</title>
+	<title>Photo Display</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	
 	<!-- Styles -->
@@ -28,7 +28,11 @@
     <![endif]-->
 </head>
 
-<body>
+<body id="photolistBody">
+	<!--<img src= photos[0].url />-->
+	
+	
+	
 	
 		<div id = "main">
 			<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -39,23 +43,18 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="#">PhotoPlacer</a>
+					<a class="navbar-brand" href="#">Photo Display</a>
 				</div>
 				  <!-- Collect the nav links, forms, and other content for toggling -->
 
 			  
 				<div class="collapse navbar-collapse navbar-ex1-collapse">
-					<ul class="nav navbar-nav">
-						
-						<li><a href=""index.html"">Back to Main Map</a></li>
-						
-					</ul>
-					
-					<ul class="nav navbar-nav navbar-right">					  
+					<ul class="nav navbar-nav navbar-right">
+					  
 					  <li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
 						<ul class="dropdown-menu">
-						  <li><a href="wishlist.html">Wishlist</a></li>
+						  <li><a href="index.html">Home</a></li>
 						  <li role = "presentation" class = "divider"></li>
 						  <li class = "dropdown-header"> Photo Upload </li>
 						  <li class = "dropdown-header"><input type = "file" id = "uploadPhoto"/>	</li>
@@ -67,10 +66,14 @@
 					</ul>
 				  </div><!-- /.navbar-collapse -->
 			</nav>
-			<div id="map-canvas"/>
+			
+			<div id = "photo_list">
+				
+			</div>
+			
 		</div>
 		
-	
+		
 	
 </body>
 
