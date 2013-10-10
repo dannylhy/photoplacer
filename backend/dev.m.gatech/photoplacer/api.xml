@@ -8,8 +8,8 @@
 		<description><![CDATA[This API lets you add and retrieve photos]]></description>
 		
 		<index>
-			<description><![CDATA[Get a list of photos]]></description>
-			<action file='photos.php'><![CDATA[getPhotos();]]></action>
+			<description><![CDATA[Gets the global list of photos. Returns the list of photo ids sorted by newest first (largest photoid to smallest)]]></description>
+			<action file='photos.php'><![CDATA[getAllPhotos($_GET['limit']);]]></action>
 		</index>
 		
 		<get>
@@ -18,8 +18,8 @@
 		</get>
 		
 		<post>
-			<description><![CDATA[API to upload a photo. Parameters are lat, lng, accelerometer data (?), taglist, (binary) photo]]></description>
-			<action file='photos.php'><![CDATA[addPhoto($_POST['lat'],$_POST['lng'],$_POST['accel_data'],$_POST['tags']);]]></action>
+			<description><![CDATA[API to upload a photo. Parameters are url, latitude, longitude, altitude, username, direction, comma-separated taglist]]></description>
+			<action file='photos.php'><![CDATA[addPhoto($_POST['url'],$_POST['latitude'],$_POST['longitude'],$_POST['altitude'],$_POST['direction'],$_USER['uid']),$_POST['tags']);]]></action>
 		</post>
 		
 		<put>
@@ -33,12 +33,12 @@
 		
 		<index>
 			<description><![CDATA[This is how you can get a list of popular locations in the whole campus]]></description>
-			<action file='map.php'><![CDATA[getTopLocations();]]></action>
+			<action file='map.php'><![CDATA[getTopLocations($_GET['limit']);]]></action>
 		</index>
 		
 		<get>
 			<description><![CDATA[Get a list of popular locations bounded by 2 sets of coordinates. 4 parameters are needed, the parameters are sw_lat, sw_lng, ne_lat, ne_lng]]></description>
-			<action file='map.php'><![CDATA[getBoundLocation($_GET['sw_lat'], $_GET['sw_lng'], $_GET['ne_lat'], $_GET['ne_lng']);]]></action>
+			<action file='map.php'><![CDATA[getBoundLocation($_GET['sw_lat'], $_GET['sw_lng'], $_GET['ne_lat'], $_GET['ne_lng'], $_GET['limit']);]]></action>
 		</get>
 		
 		<command id='zoom' security='public'>
@@ -51,54 +51,36 @@
 			
 			<get>
 				<description><![CDATA[Get a list of photos at a zoomed in location]]></description>
-				<action file='map.php'><![CDATA[getPhotosAtZoomedLocation($_REST['map'],$_REST['zoom']);]]></action>
+				<action file='map.php'><![CDATA[getPhotosAtZoomedLocation($_REST['map'],$_REST['map/zoom']);]]></action>
 			</get>
 			
 		</command>
 	</command>
-	<!--
-	<command id='comment' security='protected'>
-	
-		
-		<command id='comment' security='protected'>
-			<index>
-				<action file='comments.php'><![CDATA[listUserComments($_REST['user']);]]></action>
-			</index>
-			<get>
-				<action file='comments.php'><![CDATA[getUserComment($_REST['user'], $_REST['user/comment']);]]></action>
-			</get>
-		</command>
-		<description><![CDATA[This simple API lets you add and remove comments]]></description>
+	<!--<command id='wishlist' security='protected'>-->
+	<command id='wishlist' security='public'>
+		<description><![CDATA[This API lets you get, add and delete for a single users wishlist]]></description>
 		
 		<index>
-			<description><![CDATA[This is how you can get a listing of all comments]]></description>
-			
-			<action file='comments.php'><![CDATA[listComments();]]></action>
+			<description><![CDATA[Gets the wishlist of photos. Returns (photoid, w_id) for the logged in user]]></description>
+			<action file='wishlist.php'><![CDATA[getWishlist('dlee399');]]></action>
+			<!--<action file='wishlist.php'><![CDATA[getWishlist($_USER['uid']);]]></action>-->
 		</index>
 		
 		<get>
-			<description><![CDATA[This is how you can get a specific comment]]></description>
-			
-			<action file='comments.php'><![CDATA[getComment($_REST['comment']);]]></action>
+			<description><![CDATA[Interface to get the photo details for a specific wishlist entry. Parameter w_id comes from the rest index. Returns (photoid, url, latitude, longitude, altitude, direction, timestamp, popularity, w_id) for the (logged in user, w_id) pair]]></description>
+			<action file='wishlist.php'><![CDATA[getWishlistEntry('dlee399', $_REST['wishlist']);]]></action>
+			<!--<action file='wishlist.php'><![CDATA[getWishlistEntry($_USER['uid'], $_REST['wishlist']);]]></action>-->
 		</get>
 		
 		<post>
-			<description><![CDATA[This is how you can create a comment]]></description>
-			
-			<action file='comments.php'><![CDATA[addComment($_POST['commentText']);]]></action>
+			<description><![CDATA[API to add a photo to the users wishlist. Parameter is the photoid to add. Result is the number of rows affected (0 indicates error)]]></description>
+			<action file='wishlist.php'><![CDATA[addWishlistEntry($_USER['uid'], $_POST['photoid']);]]></action>
 		</post>
 		
-		<put>
-			<description><![CDATA[This is how you can update a comment]]></description>
-			
-			<action file='comments.php'><![CDATA[updateComment($_REST['comment'],$_POST['commentText']);]]></action>
-		</put>
-		
 		<delete>
-			<description><![CDATA[This is how you can delete a comment]]></description>
-			
-			<action file='comments.php'><![CDATA[deleteComment($_REST['comment']);]]></action>
+			<description><![CDATA[API to delete a photo from the users wishlist. Parameter w_id comes from the rest index. Result is the number of rows affected (0 indicates error)]]></description>
+			<action file='wishlist.php'><![CDATA[deleteWishlistEntry($_USER['uid'], $_REST['wishlist']);]]></action>
 		</delete>
 	</command>
-	-->
+	
 </api>
