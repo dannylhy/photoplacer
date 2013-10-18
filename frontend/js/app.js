@@ -1,6 +1,6 @@
 $( document ).ready(function initialize() {
 	
-        
+    $('#uploadPhoto').change(photoUpload);    
 	initializeMap();
 });
 
@@ -98,7 +98,7 @@ createMapMarker(markers);
 }); 
  }
  
-      function getPopularPhotos(id) {
+function getPopularPhotos(id) {
    $.ajax({
        url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/"+previd+"/zoom/"+id,
  context: document.body,
@@ -113,6 +113,52 @@ createMapMarker(markers);
  }
 }); 
  }
+
+function getWishlistPhotos(id) {
+   $.ajax({
+       url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist/",
+ context: document.body,
+ success: function(data) {
+		photos = jQuery.parseJSON(data);
+	
+		//window.location = "photo.html" ;
+		for(i=0;i<photos.length; i++){
+			document.write("<img src=\"" + photos[i].url + "\"> <p></p>");
+		//$("#photo_list").html("<img src=\"" + photos[i].url + "\"> <p>hello test text</p>");
+		}
+ }
+}); 
+ }
+
+ 
+ function photoUpload() {
+	console.log("hhhhh");
+	updatePopularity(1); 
+    $.ajax({
+        url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo",
+        data: {'url': 'http://i.imgur.com/iZVfXgJ.jpg','latitude':'0','longitude':'0','altitude':'0','direction':'0','timestamp':'2013-10-18','popularity':'2'},
+        context: document.body,
+        type: 'POST',
+        success: function(data) {
+            console.log("success");
+			//$('#main').html(data);
+        }
+    });
+}
+
+function updatePopularity(id) {
+    $.ajax({
+        url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo/"+id,
+        context: document.body,
+        data: {'photoid': id},
+        headers: {'X-HTTP-Method-Override': 'PUT'},
+        type: 'POST',
+        success: function(data) {
+		console.log("Photo Put Success");
+            //$('#PutResult').html(data);
+        }
+    });
+}
  
 
 //google.maps.event.addDomListener(window, 'load', initialize);
