@@ -14,12 +14,12 @@
 		
 		<get>
 			<description><![CDATA[Interface to get info about a specific photo. Photo ID comes from photo/index or map.]]></description>
-			<action file='photos.php'><![CDATA[getPhoto($_REST['photo']);]]></action>
+			<action file='photos.php'><![CDATA[getPhoto($_REST['photoid']);]]></action>
 		</get>
 		
 		<post>
-			<description><![CDATA[API to upload a photo. Parameters are url, latitude, longitude, altitude, username, direction, comma-separated taglist]]></description>
-			<action file='photos.php'><![CDATA[addPhoto($_POST['url'],$_POST['latitude'],$_POST['longitude'],$_POST['altitude'],$_POST['direction'],$_USER['uid']),$_POST['tags']);]]></action>
+			<description><![CDATA[API to upload a photo. Parameters are url, timestamp, latitude, longitude, altitude, direction, comma-separated taglist(tags). Return value is newPhotoId in JSON format]]></description>
+			<action file='photos.php'><![CDATA[addPhoto($_POST['url'],$_POST['timestamp'],$_POST['latitude'],$_POST['longitude'],$_POST['altitude'],$_POST['direction'],$_USER['uid'],$_POST['tags']);]]></action>
 		</post>
 		
 		<put>
@@ -73,13 +73,15 @@
 		</get>
 		
 		<post>
-			<description><![CDATA[API to add a photo to the users wishlist. Parameter is the photoid to add. Result is the number of rows affected (0 indicates error)]]></description>
-			<action file='wishlist.php'><![CDATA[addWishlistEntry($_USER['uid'], $_POST['photoid']);]]></action>
+			<description><![CDATA[API to add a photo to the users wishlist. Parameter is the photoid to add. Result is the ID of the new wishlist entry]]></description>
+			<action file='wishlist.php'><![CDATA[addWishlistEntry('dlee399', $_POST['photoid']);]]></action>
+			<!--<action file='wishlist.php'><![CDATA[addWishlistEntry($_USER['uid'], $_POST['photoid']);]]></action>-->
 		</post>
 		
 		<delete>
-			<description><![CDATA[API to delete a photo from the users wishlist. Parameter w_id comes from the rest index. Result is the number of rows affected (0 indicates error)]]></description>
-			<action file='wishlist.php'><![CDATA[deleteWishlistEntry($_USER['uid'], $_REST['wishlist']);]]></action>
+			<description><![CDATA[API to delete a photo from the users wishlist. Parameter w_id comes from the rest index. Result is the number of rows affected.]]></description>
+			<action file='wishlist.php'><![CDATA[deleteWishlistEntry('dlee399', $_REST['wishlist']);]]></action>
+			<!--<action file='wishlist.php'><![CDATA[deleteWishlistEntry($_USER['uid'], $_REST['wishlist']);]]></action>-->
 		</delete>
 	</command>
 	

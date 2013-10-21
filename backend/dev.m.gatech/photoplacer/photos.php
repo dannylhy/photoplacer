@@ -31,55 +31,49 @@
 	}
 
 	# Adds a photo to the db
-	function addPhoto($url, $latitude, $longitude, $altitude, $direction, $username, $tags) {
+	function addPhoto($url, $timestamp, $latitude, $longitude, $altitude, $direction, $username, $tags) {
 		$altitude = !empty($altitude) ? "'$altitude'" : "NULL";
 		$direction = !empty($direction) ? "'$direction'" : "NULL";
 		
+		# Get the UID for the selected username
 		$uidstr = "NULL";
-		
 		if (!empty($username)) {
 			$dbQuery = sprintf("
 				SELECT UID 
 				FROM users 
 				WHERE username = '%s'", 
 				$username);
-			var_dump($dbQuery);
 			$result = getDBResultRecord($dbQuery);
-			
 			$uidstr = $result['UID'];
 		}
 		
 		$dbQuery = sprintf("
-			INSERT INTO photos (url, latitude, longitude, altitude, direction, UID) 
-			VALUES (%s , %f, %f, %s, %s, %s);", $url, $latitude, $longitude, $altitude, $direction, $uidstr);
-		$result = getDBResultInserted($dbQuery, $newPhotoId);
+			INSERT INTO photos (url, timestamp, latitude, longitude, altitude, direction, UID) 
+			VALUES (%s, %s, %s, %s, %s, %s, %s)", $url, $timestamp, $latitude, $longitude, $altitude, $direction, $uidstr);
+		$insertResult = getDBResultInserted($dbQuery, "newPhotoId");
+		$newPhotoId = $insertResult["newPhotoId"];
 		
-		var_dump($result); #debug
-
-/*		
 		# Add tag fields only if nonempty
 		if (!empty($tags)) {
 			$tag_list = explode(',',$tags);
 			
 			# check that tags are in the db, or add them as new ones
-			$dbQuery = "INSERT OR IGNORE INTO tags (text) VALUES ";
-			foreach ($tag in $tag_list) {
-				$dbQuery .= "('{$tag}') ";
-			}
-			$result = getDBResultRecord($dbQuery);
+			$dbQuery = "INSERT IGNORE INTO tags (text) VALUES ('".implode("'),('",$tag_list)."')";
+			$result = getDBResultInserted($dbQuery);
 			
 			# associate the tags with the new photo id
+			$quoted_list = "'".implode("','",$tag_list)."'";
 			$dbQuery = "
 				INSERT INTO photo_tag_link (TAG_ID, PH_ID) 
-					SELECT TAG_ID, {$newPhotoId} AS PH_ID 
+					(SELECT TAG_ID, {$newPhotoId} AS PH_ID 
 					FROM tags
-					WHERE text IN ({$tag_list})
+					WHERE text IN ({$quoted_list}))
 				";
 			$result = getDBResultInserted($dbQuery);
 		}
-*/		
+		
 		header("Content-type: application/json");
-		echo json_encode($result);
+		echo json_encode($insertResult);
 	}
 
 	# Increments the popularity of a photo

@@ -66,7 +66,7 @@
 				FROM users 
 				WHERE username = '%s'
 			));", $photoid, $username);
-		$result = getDBResultInserted($dbQuery);
+		$result = getDBResultInserted($dbQuery,"newWishlistId");
 		
 		header("Content-type: application/json");
 		echo json_encode($result);
