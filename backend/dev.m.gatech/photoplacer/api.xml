@@ -14,11 +14,11 @@
 		
 		<get>
 			<description><![CDATA[Interface to get info about a specific photo. Photo ID comes from photo/index or map.]]></description>
-			<action file='photos.php'><![CDATA[getPhoto($_REST['photoid']);]]></action>
+			<action file='photos.php'><![CDATA[getPhoto($_REST['photo']);]]></action>
 		</get>
 		
 		<post>
-			<description><![CDATA[API to upload a photo. Parameters are url, timestamp, latitude, longitude, altitude, direction, comma-separated taglist(tags). Return value is newPhotoId in JSON format]]></description>
+			<description><![CDATA[API to upload a photo. Parameters are url, timestamp, latitude, longitude, altitude, direction, comma-separated taglist(tags). Return value is newPhotoId in JSON]]></description>
 			<action file='photos.php'><![CDATA[addPhoto($_POST['url'],$_POST['timestamp'],$_POST['latitude'],$_POST['longitude'],$_POST['altitude'],$_POST['direction'],$_USER['uid'],$_POST['tags']);]]></action>
 		</post>
 		
@@ -56,9 +56,10 @@
 			
 		</command>
 	</command>
+	
 	<!--<command id='wishlist' security='protected'>-->
 	<command id='wishlist' security='public'>
-		<description><![CDATA[This API lets you get, add and delete for a single users wishlist]]></description>
+		<description><![CDATA[This API lets you get, add and delete for a logged in users wishlist]]></description>
 		
 		<index>
 			<description><![CDATA[Gets the wishlist of photos. Returns (photoid, w_id) for the logged in user]]></description>
@@ -84,5 +85,4 @@
 			<!--<action file='wishlist.php'><![CDATA[deleteWishlistEntry($_USER['uid'], $_REST['wishlist']);]]></action>-->
 		</delete>
 	</command>
-	
 </api>

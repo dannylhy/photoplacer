@@ -21,10 +21,19 @@
 	# Gets a single photo from the db based on the photoid
 	function getPhoto($photoid) {
 		$dbQuery = sprintf("
-			SELECT p.PH_ID AS photoid, p.url, p.latitude, p.longitude, p.altitude, p.direction, p.timestamp, p.popularity, u.username 
-			FROM photos p
-			INNER JOIN users u
-			WHERE p.UID = u.UID AND p.PH_ID = %d", $photoid);
+			SELECT p.PH_ID AS photoid, p.url, p.latitude, p.longitude, p.altitude, p.direction, p.timestamp, p.popularity, u.username, GROUP_CONCAT(t.text) AS tags 
+			FROM (
+				SELECT * 
+				FROM photos 
+				WHERE PH_ID = %s
+			) p
+			LEFT JOIN photo_tag_link l
+				ON p.PH_ID = l.PH_ID
+			LEFT JOIN tags t
+				ON l.TAG_ID = t.TAG_ID
+			LEFT JOIN users u
+				ON p.UID = u.UID
+			GROUP BY p.PH_ID", $photoid);
 		$result=getDBResultRecord($dbQuery);
 		header("Content-type: application/json");
 		echo json_encode($result);
@@ -49,7 +58,7 @@
 		
 		$dbQuery = sprintf("
 			INSERT INTO photos (url, timestamp, latitude, longitude, altitude, direction, UID) 
-			VALUES (%s, %s, %s, %s, %s, %s, %s)", $url, $timestamp, $latitude, $longitude, $altitude, $direction, $uidstr);
+			VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')", mysql_escape_string($url), $timestamp, $latitude, $longitude, $altitude, $direction, $uidstr);
 		$insertResult = getDBResultInserted($dbQuery, "newPhotoId");
 		$newPhotoId = $insertResult["newPhotoId"];
 		

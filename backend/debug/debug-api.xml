@@ -1,0 +1,11 @@
+
+	<command id='debug' security='public'>
+		<description><![CDATA[Testing only]]></description>
+		
+		<index>
+			<description><![CDATA[Populates the table]]></description>
+			<action file='debug.php'><![CDATA[populateGtPlaces();]]></action>
+			<action file='debug.php'><![CDATA[randomFillLocations();]]></action>
+		</index>
+	</command>
+	

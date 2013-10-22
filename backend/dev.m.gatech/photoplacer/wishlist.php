@@ -31,21 +31,29 @@
 			echo "Error. No username entered";
 			return;
 		}
+		
 		$dbQuery = sprintf("
-				SELECT UID 
-				FROM users 
-				WHERE username = '%s'", $username);
-			$result = getDBResultRecord($dbQuery);
-
-		$dbQuery = sprintf("
-			SELECT p.PH_ID AS photoid, p.url, p.latitude, p.longitude, p.altitude, p.direction, p.timestamp, p.popularity, w.WID AS w_id
-			FROM photos p 
-			INNER JOIN wishlist w ON p.PH_ID = w.PH_ID 
-			INNER JOIN users u ON w.UID = u.UID 
-			WHERE u.username = '%s' AND w.WID = '%d'", $username, $w_id);
-		#$dbQuery = sprintf("SELECT PH_ID AS photoid, WID AS w_id 
-		#	FROM wishlist 
-		#	WHERE WID = '%d'", $w_id);
+			SELECT p.PH_ID AS photoid, p.url, p.latitude, p.longitude, p.altitude, p.direction, p.timestamp, p.popularity, u.username, GROUP_CONCAT(t.text) AS tags 
+			FROM (
+				SELECT * 
+				FROM wishlist 
+				WHERE WID = '%d'
+			) w
+			INNER JOIN photos p ON w.PH_ID = p.PH_ID
+			LEFT JOIN photo_tag_link l
+				ON p.PH_ID = l.PH_ID
+			LEFT JOIN tags t
+				ON l.TAG_ID = t.TAG_ID
+			LEFT JOIN users u
+				ON w.UID = u.UID
+			WHERE u.username = '%s'
+			GROUP BY p.PH_ID
+			", $w_id, $username);
+		/*
+		$dbQuery = sprintf("SELECT PH_ID AS photoid, WID AS w_id 
+			FROM wishlist 
+			WHERE WID = '%d'", $w_id);
+		*/
 		$result = getDBResultRecord($dbQuery);
 		
 		header("Content-type: application/json");
