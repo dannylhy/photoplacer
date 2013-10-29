@@ -3,20 +3,16 @@
     height:800px;
 }
 
+#wishList {
+	display: none
+}
+
+#photoList {
+	display: none
+}
+
+#photoList > ul {
+	list-style: none;
+}
+
 body { padding-top: 45px; }
-
-ul.WishListPhotos {
-  list-style-type: none
-}
-
-#wishlistBody {
-	padding-top: 55px;
-}
-
-garbage {
-position:absolute;
-	top:0;
-	bottom:0;
-	left:0;
-	right:0;
-}
