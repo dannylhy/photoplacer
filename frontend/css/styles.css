@@ -5,9 +5,13 @@
 
 body { padding-top: 45px; }
 
+ul.WishListPhotos {
+  list-style-type: none
+}
+
 #wishlistBody {
 	padding-top: 55px;
-} 
+}
 
 garbage {
 position:absolute;
@@ -15,12 +19,4 @@ position:absolute;
 	bottom:0;
 	left:0;
 	right:0;
-}
-
-#main{
-	display: inline;
-}
-
-#wishlist{
-	display: inline;
 }
