@@ -9,7 +9,7 @@
 			echo "Error. No username entered";
 			return;
 		}
-		#$dbQuery = sprintf("SELECT p.PH_ID AS photoid, p.url, p.latitude, p.longitude, p.altitude, p.direction, p.timestamp, p.popularity, w.WID 
+		#$dbQuery = sprintf("SELECT p.PH_ID AS photoid, p.url, X(p.lat_lng) AS latitude, Y(p.lat_lng) AS longitude, p.altitude, p.direction, p.timestamp, p.popularity, w.WID 
 		#	FROM photos p 
 		#	INNER JOIN wishlist w ON p.PH_ID = w.PH_ID 
 		#	INNER JOIN users u ON w.UID = u.UID 
@@ -33,7 +33,7 @@
 		}
 		
 		$dbQuery = sprintf("
-			SELECT p.PH_ID AS photoid, p.url, p.latitude, p.longitude, p.altitude, p.direction, p.timestamp, p.popularity, u.username, GROUP_CONCAT(t.text) AS tags 
+			SELECT p.PH_ID AS photoid, w.WID AS w_id, p.url, X(p.lat_lng) AS latitude, Y(p.lat_lng) AS longitude, p.altitude, p.direction, p.timestamp, p.popularity, u.username, GROUP_CONCAT(t.text) AS tags 
 			FROM (
 				SELECT * 
 				FROM wishlist 

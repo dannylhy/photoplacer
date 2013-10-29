@@ -13,7 +13,7 @@
 		</index>
 		
 		<get>
-			<description><![CDATA[Interface to get info about a specific photo. Photo ID comes from photo/index or map.]]></description>
+			<description><![CDATA[Interface to get info about a specific photo. No parameter, but the rest API needs the Photo ID at the end of the URL. Photo ID comes from photo/index or map.]]></description>
 			<action file='photos.php'><![CDATA[getPhoto($_REST['photo']);]]></action>
 		</get>
 		
@@ -23,7 +23,7 @@
 		</post>
 		
 		<put>
-			<description><![CDATA[API to increment photo popularity]]></description>
+			<description><![CDATA[API to increment photo popularity. No parameter, but the rest API needs the Photo ID at the end of the URL. Photo ID comes from photo/index or map.]]></description>
 			<action file='photos.php'><![CDATA[incrementPopularity($_REST['photo']);]]></action>
 		</put>
 	</command>
@@ -32,12 +32,12 @@
 		<description><![CDATA[This API lets you get popular locations on the map]]></description>
 		
 		<index>
-			<description><![CDATA[This is how you can get a list of popular locations in the whole campus]]></description>
+			<description><![CDATA[This is how you can get a list of popular locations in the whole campus. Optional limit POST parameter can increase or reduce the number of entries returned. Default is 20. Returns array of (latitude, longitude, photocount, id (zoomed out id)) ordered by photo count (largest to smallest)]]></description>
 			<action file='map.php'><![CDATA[getTopLocations($_GET['limit']);]]></action>
 		</index>
 		
 		<get>
-			<description><![CDATA[Get a list of popular locations bounded by 2 sets of coordinates. 4 parameters are needed, the parameters are sw_lat, sw_lng, ne_lat, ne_lng]]></description>
+			<description><![CDATA[Get a list of popular locations bounded by 2 sets of coordinates. 4 POST parameters are needed, the parameters are sw_lat, sw_lng, ne_lat, ne_lng. Optional limit POST parameter can increase or reduce the number of entries returned. Default is 20. Returns array of (latitude, longitude, photocount, id (zoomed out id)) ordered by photo count (largest to smallest)]]></description>
 			<action file='map.php'><![CDATA[getBoundLocation($_GET['sw_lat'], $_GET['sw_lng'], $_GET['ne_lat'], $_GET['ne_lng'], $_GET['limit']);]]></action>
 		</get>
 		
@@ -45,12 +45,12 @@
 			<description><![CDATA[This API lets you get zoomed locations on the map]]></description>
 			
 			<index>
-				<description><![CDATA[Get a list of popular locations in the zoomed location]]></description>
+				<description><![CDATA[Get a list of popular locations in the zoomed location. No POST parameters, but the rest API needs the zoomed out location id <b>before</b> the zoom path in the URL. (i.e., map/X/zoom). Returns array of (latitude, longitude, photocount, id (zoomed in id)) ordered by photo count (largest to smallest)]]></description>
 				<action file='map.php'><![CDATA[getZoomedLocationsById($_REST['map']);]]></action>
 			</index>
 			
 			<get>
-				<description><![CDATA[Get a list of photos at a zoomed in location]]></description>
+				<description><![CDATA[Get a list of photos at a zoomed in location. No POST parameters, but the rest API needs the zoomed in location id at the end of the URL. Zoomed in location id comes from the zoom/index API. Returns array of (photoid, url, latitude, longitude, altitude, direction, timestamp, popularity) ordered by popularity (largest to smallest)]]></description>
 				<action file='map.php'><![CDATA[getPhotosAtZoomedLocation($_REST['map'],$_REST['map/zoom']);]]></action>
 			</get>
 			
@@ -59,29 +59,29 @@
 	
 	<!--<command id='wishlist' security='protected'>-->
 	<command id='wishlist' security='public'>
-		<description><![CDATA[This API lets you get, add and delete for a logged in users wishlist]]></description>
+		<description><![CDATA[This API lets you get, add and delete entries in a logged in users wishlist]]></description>
 		
 		<index>
 			<description><![CDATA[Gets the wishlist of photos. Returns (photoid, w_id) for the logged in user]]></description>
-			<action file='wishlist.php'><![CDATA[getWishlist('dlee399');]]></action>
+			<action file='wishlist.php'><![CDATA[getWishlist('gpburdell');]]></action>
 			<!--<action file='wishlist.php'><![CDATA[getWishlist($_USER['uid']);]]></action>-->
 		</index>
 		
 		<get>
-			<description><![CDATA[Interface to get the photo details for a specific wishlist entry. Parameter w_id comes from the rest index. Returns (photoid, url, latitude, longitude, altitude, direction, timestamp, popularity, w_id) for the (logged in user, w_id) pair]]></description>
-			<action file='wishlist.php'><![CDATA[getWishlistEntry('dlee399', $_REST['wishlist']);]]></action>
+			<description><![CDATA[Interface to get the photo details for a specific wishlist entry. No POST parameters, but the rest API needs the wishlist entry id (w_id) at the end of the URL. Wishlist entry id comes from the wishlist/index. Returns (photoid, w_id, url, latitude, longitude, altitude, direction, timestamp, popularity, tags (comma separated taglist)) for the logged in user]]></description>
+			<action file='wishlist.php'><![CDATA[getWishlistEntry('gpburdell', $_REST['wishlist']);]]></action>
 			<!--<action file='wishlist.php'><![CDATA[getWishlistEntry($_USER['uid'], $_REST['wishlist']);]]></action>-->
 		</get>
 		
 		<post>
 			<description><![CDATA[API to add a photo to the users wishlist. Parameter is the photoid to add. Result is the ID of the new wishlist entry]]></description>
-			<action file='wishlist.php'><![CDATA[addWishlistEntry('dlee399', $_POST['photoid']);]]></action>
+			<action file='wishlist.php'><![CDATA[addWishlistEntry('gpburdell', $_POST['photoid']);]]></action>
 			<!--<action file='wishlist.php'><![CDATA[addWishlistEntry($_USER['uid'], $_POST['photoid']);]]></action>-->
 		</post>
 		
 		<delete>
-			<description><![CDATA[API to delete a photo from the users wishlist. Parameter w_id comes from the rest index. Result is the number of rows affected.]]></description>
-			<action file='wishlist.php'><![CDATA[deleteWishlistEntry('dlee399', $_REST['wishlist']);]]></action>
+			<description><![CDATA[API to delete a photo from the users wishlist. No POST parameters, but the rest API needs the wishlist entry id (w_id) at the end of the URL. Wishlist entry id comes from the wishlist/index. Result is the number of rows affected.]]></description>
+			<action file='wishlist.php'><![CDATA[deleteWishlistEntry('gpburdell', $_REST['wishlist']);]]></action>
 			<!--<action file='wishlist.php'><![CDATA[deleteWishlistEntry($_USER['uid'], $_REST['wishlist']);]]></action>-->
 		</delete>
 	</command>

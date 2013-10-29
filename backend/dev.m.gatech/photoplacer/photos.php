@@ -21,7 +21,7 @@
 	# Gets a single photo from the db based on the photoid
 	function getPhoto($photoid) {
 		$dbQuery = sprintf("
-			SELECT p.PH_ID AS photoid, p.url, p.latitude, p.longitude, p.altitude, p.direction, p.timestamp, p.popularity, u.username, GROUP_CONCAT(t.text) AS tags 
+			SELECT p.PH_ID AS photoid, p.url, X(p.lat_lng) AS latitude, Y(p.lat_lng) AS longitude, p.altitude, p.direction, p.timestamp, p.popularity, u.username, GROUP_CONCAT(t.text) AS tags 
 			FROM (
 				SELECT * 
 				FROM photos 
@@ -41,8 +41,10 @@
 
 	# Adds a photo to the db
 	function addPhoto($url, $timestamp, $latitude, $longitude, $altitude, $direction, $username, $tags) {
-		$altitude = !empty($altitude) ? "'$altitude'" : "NULL";
-		$direction = !empty($direction) ? "'$direction'" : "NULL";
+		if (empty($altitude))
+			$altitude = "NULL";
+		if (empty($direction))
+			$direction = "NULL";
 		
 		# Get the UID for the selected username
 		$uidstr = "NULL";
@@ -57,8 +59,9 @@
 		}
 		
 		$dbQuery = sprintf("
-			INSERT INTO photos (url, timestamp, latitude, longitude, altitude, direction, UID) 
-			VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')", mysql_escape_string($url), $timestamp, $latitude, $longitude, $altitude, $direction, $uidstr);
+			INSERT INTO photos (url, timestamp, lat_lng, altitude, direction, UID) 
+			VALUES ('%s', '%s', POINT(%s, %s), %s, %s, %s)", mysql_real_escape_string($url), $timestamp, $latitude, $longitude, $altitude, $direction, $uidstr);
+		
 		$insertResult = getDBResultInserted($dbQuery, "newPhotoId");
 		$newPhotoId = $insertResult["newPhotoId"];
 		
@@ -73,11 +76,11 @@
 			# associate the tags with the new photo id
 			$quoted_list = "'".implode("','",$tag_list)."'";
 			$dbQuery = "
-				INSERT INTO photo_tag_link (TAG_ID, PH_ID) 
-					(SELECT TAG_ID, {$newPhotoId} AS PH_ID 
+				INSERT INTO photo_tag_link (TAG_ID, PH_ID) (
+					SELECT TAG_ID, {$newPhotoId} AS PH_ID 
 					FROM tags
-					WHERE text IN ({$quoted_list}))
-				";
+					WHERE text IN ({$quoted_list})
+				)";
 			$result = getDBResultInserted($dbQuery);
 		}
 		
