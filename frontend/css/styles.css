@@ -15,4 +15,8 @@
 	list-style: none;
 }
 
+#wishList > ul {
+	list-style: none;
+}
+
 body { padding-top: 45px; }

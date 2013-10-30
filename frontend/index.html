@@ -1,6 +1,10 @@
+<!--Authorization: Client-ID 6f94f078334088f-->
 <!DOCTYPE html>
 <html lang = "en">
 <head>
+	<?php
+	header("Authorization: Client-ID 6f94f078334088f");
+	?>
 	<title>PhotoPlacer Home</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	
@@ -43,7 +47,7 @@
 				
 				<a class="navbar-brand" href="index.html">PhotoPlacer</a>
 				
-				<a class="navbar-brand" href="index.html">> Home</a>
+				<a id = "NavBarLoc" class="navbar-brand" href="index.html">>    Home</a>
 				
 			</div>
 			
@@ -86,7 +90,8 @@
 	</div>
 
 	<div id = "wishList">
-		<ul class="WishListPhotos">
+		<ul id="WishListPhotos">
+		<!--
 			<li>
 			<a href="http://i.imgur.com/iZVfXgJ.jpg">
 				<img src="http://i.imgur.com/iZVfXgJ.jpg" alt="Kitty!" width="150" height="150">
@@ -95,6 +100,7 @@
 			<li> <a href="#">		Wishlist Item #2		</a> </li>
 			<li> <a href="#">		Wishlist Item #3		</a> </li>
 			<li> <a href="#">		Wishlist Item #4		</a> </li>
+		-->
 		</ul>
 	</div>
 	

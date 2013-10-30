@@ -9,6 +9,9 @@ $(document).ready(function initialize() {
 		$("#photoList").css('display', 'none');
 		$("#wishList").css('display', 'inline');
 		
+		$("#NavBarLoc").text(">    Wishlist");
+		$("#wishLink").css('display', 'none');
+		
 		// Retrieve a list of photos for the given marker
 		$.ajax({
 			url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist",
@@ -18,28 +21,24 @@ $(document).ready(function initialize() {
 				
 				//var photos = jQuery.parseJSON(data);
 				var photos = data;
-			
-				/*
-				document.write("<div id = \"wishList\">" +
-					"<ul style=\"list-style: none;\">");
-				
+						
 				for (var i = 0; i < photos.length; i++) {
 					var url = photos[i].url;
-					document.write("<li>" +				
+					
+					$("#WishListPhotos").append( 
+						"<li>" +				
 						"<a href=\"" + url + "\">" +
 						"<img src=\"" + url + "\" width=\"150\" height=\"150\"></a>" +
-						"</li>");
+						"</li>"
+					);
 				}
-				
-				document.write("</ul>");
-				*/
-				
-				//$("#map-canvas").css('display', 'none');
 			}
 		});
 		
 		$("#wishList").css('display', 'inline');
 	});
+	
+	$("#uploadPhoto").change(photoUpload);
 
 	initializeMap();
 });
@@ -217,37 +216,57 @@ function popOutPhoto(dataMarker, mapMarker) {
 	});
 }
 
-// WishlistIndex
-function getWishlistPhotos() {
-	$.ajax({
-		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist/",
-		context: document.body,
-		success: function(data) {
-			console.log("getWishlistPhotos() AJAX success.");
-            //var photos = jQuery.parseJSON(data);
-			var photos = data;
-        
-            //window.location = "photo.html" ;
-            for(i = 0; i < photos.length; i++) {
-                document.write("<img src=\"" + photos[i].url + "\"> <p></p>");
-                //$("#photo_list").html("<img src=\"" + photos[i].url + "\"> <p>hello test text</p>");
-            }
-		}
-	});
-}
+function photoUpload(evt) {
 
-function photoUpload() {
-	var newData = {'url': 'http://i.imgur.com/iZVfXgJ.jpg', 'timestamp':'2013-10-18 00:00:00', 'latitude':'0', 	'longitude':'0','altitude':'0', 'direction':'0'};
-    
-    $.ajax({
-        url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo",
-        data: newData,
-        context: document.body,
-        type: 'POST',
-        success: function(data) {
-			console.log("photoUpload AJAX success.");
+	console.log("PhotoUpload button clicked.");
+	
+	var file = evt.target.files[0];
+	console.log("File: " + file);
+	
+	if (!file || !file.type.match(/image.*/))
+	{
+		console.log("File uploaded is not a valid image file.");
+		return;
+	}
+	
+	document.body.className = "uploading";
+	
+	// Upload File to Imgur
+	var fd = new FormData(); 
+    fd.append("image", file); 
+        
+	var xhr = new XMLHttpRequest(); 
+    xhr.open("POST", "https://api.imgur.com/3/image.json"); 
+        xhr.onload = function() {
+			console.log("PhotoUpload() AJAX successful IMGUR POST.");
+			var link = JSON.parse(xhr.responseText).data.link
+            console.log("link: " + link);
+            document.body.className = "uploaded";
+			
+			// Construct data object to send
+			var data = {
+				url: link,
+				latitude: null,
+				longitude: null,
+				altitude: null,
+				timestamp: null
+			};
+			
+			// Post URL to PhotoPlacer API
+			$.ajax({
+				url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo",
+				context: document.body,
+				//data: data,				
+				data: {'url': link, 'latitude': null, 'longitude': null, 'altitude': null, 'timestamp': null},
+				type: 'POST',
+				success: function(data) {
+					console.log("PhotoUpload() AJAX successful API POST.");
+				}
+			});
         }
-    });
+        
+    xhr.setRequestHeader('Authorization', 'Client-ID 8a8067ff1cd7a8d');
+	xhr.send(fd);
 }
 
 function updatePopularity(id) {
