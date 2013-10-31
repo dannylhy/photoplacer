@@ -1,10 +1,6 @@
-<!--Authorization: Client-ID 6f94f078334088f-->
 <!DOCTYPE html>
 <html lang = "en">
 <head>
-	<?php
-	header("Authorization: Client-ID 6f94f078334088f");
-	?>
 	<title>PhotoPlacer Home</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	
@@ -47,30 +43,12 @@
 				
 				<a class="navbar-brand" href="index.html">PhotoPlacer</a>
 				
-				<a id = "NavBarLoc" class="navbar-brand" href="index.html">>    Home</a>
+				<a id = "NavBarLoc" class="navbar-brand" href="index.html">>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Home</a>
 				
 			</div>
 			
 			<!-- Collect the nav links, forms, and other content for toggling -->
 			<div class="collapse navbar-collapse navbar-ex1-collapse">
-				
-				<!--
-				<ul class="nav navbar-nav navbar-right">					  
-					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-						<ul class="dropdown-menu">
-							<li> <a href="wishlist.html">Wishlist</a> </li>
-							<li role = "presentation" class = "divider"></li>
-							<li class = "dropdown-header">Photo Upload</li>
-							<li class = "dropdown-header"> <input type = "file" id = "uploadPhoto"/> </li>
-							<li role = "presentation" class = "divider"></li>
-							<li><a href="#">Something else here</a></li>
-							<li><a href="#">Separated link</a></li>
-						</ul>
-					</li>
-				</ul>
-				-->
-				
 				<ul class="nav navbar-nav navbar-left">
 					<li> <a id="wishLink" href="#">My Wishlist</a> </li>
 				</ul>
@@ -84,23 +62,14 @@
 	</div>
 		
 	<div id="photoList">
-		<ul id="PhotoListPhotos">
+		<ul style="padding-top: 45px;" id="PhotoListPhotos">
 			
 		</ul>
 	</div>
 
 	<div id = "wishList">
-		<ul id="WishListPhotos">
-		<!--
-			<li>
-			<a href="http://i.imgur.com/iZVfXgJ.jpg">
-				<img src="http://i.imgur.com/iZVfXgJ.jpg" alt="Kitty!" width="150" height="150">
-			</a>
-			</li>
-			<li> <a href="#">		Wishlist Item #2		</a> </li>
-			<li> <a href="#">		Wishlist Item #3		</a> </li>
-			<li> <a href="#">		Wishlist Item #4		</a> </li>
-		-->
+		<ul style="padding-top: 45px;" id="WishListPhotos">
+
 		</ul>
 	</div>
 	

@@ -2,41 +2,7 @@
 
 $(document).ready(function initialize() {
 
-	$("#wishLink").click(function() {
-		console.log("WishList clicked");
-		
-		$("#map-canvas").css('display', 'none');
-		$("#photoList").css('display', 'none');
-		$("#wishList").css('display', 'inline');
-		
-		$("#NavBarLoc").text(">    Wishlist");
-		$("#wishLink").css('display', 'none');
-		
-		// Retrieve a list of photos for the given marker
-		$.ajax({
-			url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist",
-			context: document.body,
-			success: function(data) {
-				console.log("wishList index AJAX success.");
-				
-				//var photos = jQuery.parseJSON(data);
-				var photos = data;
-						
-				for (var i = 0; i < photos.length; i++) {
-					var url = photos[i].url;
-					
-					$("#WishListPhotos").append( 
-						"<li>" +				
-						"<a href=\"" + url + "\">" +
-						"<img src=\"" + url + "\" width=\"150\" height=\"150\"></a>" +
-						"</li>"
-					);
-				}
-			}
-		});
-		
-		$("#wishList").css('display', 'inline');
-	});
+	$("#wishLink").click(showWishlist);
 	
 	$("#uploadPhoto").change(photoUpload);
 
@@ -76,10 +42,8 @@ function showMapMarkers() {
         success: function(data) {
 			console.log("getMapMarkers() AJAX successful.");
 			
-			//var markers = jQuery.parseJSON(data);
 			var dataMarkers = data;
 			
-			//createMapMarkers(dataMarkers);
 			for (var i = 0; i < dataMarkers.length; i++)
 			{
 				addMapMarker(dataMarkers[i]);
@@ -103,6 +67,7 @@ function addMapMarker(dataMarker) {
 		photoCountIW.open(Map, mapMarker);
 	}); 
 	
+	// Base display level
 	if (0 == Level) {
 		google.maps.event.addListener(mapMarker, 'click', function() {
 			Map.setZoom(20);
@@ -114,13 +79,13 @@ function addMapMarker(dataMarker) {
 		});
 	}
 	
+	// Zoomed display level
 	if (1 == Level) {
 		popOutPhoto(dataMarker, mapMarker);
 	}  
 }
 
-
-// Requests the markers of the zoomed portion
+// Requests the markers of the zoomed portion and shows them
 function showMapZoomMarkers(dataMarker) {
 	$.ajax({
 		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/" + dataMarker.id + "/zoom",
@@ -128,12 +93,8 @@ function showMapZoomMarkers(dataMarker) {
 		success: function(data) {
 			console.log("mapZoomIndex() AJAX success.");
 			
-			//var dataMarkers = jQuery.parseJSON(data);
 			var dataMarkers = data;
 			
-			//PrevMarkerID = dataMarker.id;
-			
-			//createMapMarkers(dataMarkers);
 			for (var i = 0; i < dataMarkers.length; i++)
 			{
 				addMapMarker(dataMarkers[i]);
@@ -143,6 +104,7 @@ function showMapZoomMarkers(dataMarker) {
 }
 
 // Display an InfoWindow popout with the most popular photo
+// Show list of photos at last level
 function popOutPhoto(dataMarker, mapMarker) {
 	$.ajax({
 		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/" + PrevMarkerID + "/zoom/" + dataMarker.id,
@@ -182,30 +144,26 @@ function popOutPhoto(dataMarker, mapMarker) {
 						$("#map-canvas").css('display', 'none');
 						$("#photoList").css('display', 'inline');
 						
+						showPhotoList(photos, "PhotoListPhotos");
+						
+						/*
 						for (var i = 0; i < photos.length; i++) {
-							var url = photos[i].url;
+							var curPhoto = photos[i];
 							
 							$("#PhotoListPhotos").append( 
-								"<li>" +				
-								"<a href=\"" + url + "\">" +
-								"<img src=\"" + url + "\" width=\"150\" height=\"150\"></a>" +
-								"</li>"
+								"<li class=\"IMG\">" +
+								"<a href=\"" + curPhoto.url + "\">" +
+								"<img style=\"float: left; margin-right: 20px;\" src=\"" + curPhoto.url + "\" width=\"300\" height=\"300\"></a>" +
+								"<p>Latitude: " + curPhoto.latitude + "</p>" +
+								"<p>Longitude: " + curPhoto.longitude + "</p>" +
+								"<p>Direction: " + curPhoto.direction + "</p>" +
+								"<p>Timestamp: " + curPhoto.timestamp + "</p>" +
+								"<input id=\"wishButton" + i + "\" type=\"button\" value=\"Add to Wishlist\"/>" +
+								"</li>" +
+								"<br/>" + 
+								"<br/>"
 							);
 						}
-
-						/*
-						document.write("<div id = \"photoList\">" +
-							"<ul style=\"list-style: none;\">");
-						
-						for (var i = 0; i < photos.length; i++) {
-							var url = photos[i].url;
-							document.write("<li>" +				
-								"<a href=\"" + url + "\">" +
-								"<img src=\"" + url + "\" width=\"150\" height=\"150\"></a>" +
-								"</li>");
-						}
-						
-						document.write("</ul>");
 						*/
 					}
 				});
@@ -216,6 +174,10 @@ function popOutPhoto(dataMarker, mapMarker) {
 	});
 }
 
+/* PHOTO UPLOAD */
+
+// Upload a photo to Imgur (photo given by user)
+// Extract information and POST to Danny's API
 function photoUpload(evt) {
 
 	console.log("PhotoUpload button clicked.");
@@ -244,20 +206,14 @@ function photoUpload(evt) {
             document.body.className = "uploaded";
 			
 			// Construct data object to send
-			var data = {
-				url: link,
-				latitude: null,
-				longitude: null,
-				altitude: null,
-				timestamp: null
-			};
+			var data = {'url': link, 'latitude': '1.4', 'longitude': '2.5', 'altitude': null, 'direction': null, 'timestamp': '2013-10-10 13:27:00'};
 			
 			// Post URL to PhotoPlacer API
 			$.ajax({
 				url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo",
 				context: document.body,
 				//data: data,				
-				data: {'url': link, 'latitude': null, 'longitude': null, 'altitude': null, 'timestamp': null},
+				data: {'url': link, 'latitude': '1.4', 'longitude': '2.5', 'altitude': null, 'direction': null, 'timestamp': '2013-10-10 13:27:00'},
 				type: 'POST',
 				success: function(data) {
 					console.log("PhotoUpload() AJAX successful API POST.");
@@ -265,8 +221,60 @@ function photoUpload(evt) {
 			});
         }
         
-    xhr.setRequestHeader('Authorization', 'Client-ID 8a8067ff1cd7a8d');
+    xhr.setRequestHeader('Authorization', 'Client-ID 6f94f078334088f');
 	xhr.send(fd);
+}
+
+/* WISHLIST */
+
+function showWishlist() {
+	console.log("WishList clicked");
+	
+	$("#map-canvas").css('display', 'none');
+	$("#photoList").css('display', 'none');
+	$("#wishList").css('display', 'inline');
+	
+	$("#NavBarLoc").text(">").append('\xA0').append('\xA0').append('\xA0')
+		.append('\xA0').append('\xA0').append("Wishlist");
+	$("#wishLink").css('display', 'none');
+	
+	// Retrieve a list of photos for the given marker
+	$.ajax({
+		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist",
+		context: document.body,
+		success: function(data) {
+			console.log("wishList index AJAX success.");
+			
+			//var photos = jQuery.parseJSON(data);
+			var photos = data;
+					
+			showPhotoList(photos, "WishListPhotos");
+			
+			/*
+			for (var i = 0; i < photos.length; i++) {
+				var curPhoto = photos[i];
+				
+				$("#WishListPhotos").append(
+					"<li class=\"IMG\">" +
+					"<a href=\"" + curPhoto.url + "\">" +
+					"<img style=\"float: left; margin-right: 20px;\" src=\"" + curPhoto.url + "\" width=\"300\" height=\"300\"></a>" +
+					"<p>Latitude: " + curPhoto.latitude + "</p>" +
+					"<p>Longitude: " + curPhoto.longitude + "</p>" +
+					"<p>Direction: " + curPhoto.direction + "</p>" +
+					"<p>Timestamp: " + curPhoto.timestamp + "</p>" +
+					"<input id=\"wishButton" + i + "\" type=\"button\" value=\"Add to Wishlist\"/>" +
+					"</li>" +
+					"<br/>" + 
+					"<br/>"
+				);
+			}
+			*/
+			
+			$("#wishButton1").click(function() { alert("TEST!"); });
+		}
+	});
+	
+	$("#wishList").css('display', 'inline');
 }
 
 function updatePopularity(id) {
@@ -290,6 +298,30 @@ function clearOverlays() {
 	}
 	
 	Markers = [];
+}
+
+// Helper function, display photos and their information on a given element
+// var photos should hold an array of photo objects (Danny's API format) to display
+// var elementID should hold the string of the element to append the photos to
+function showPhotoList(photos, elementID)
+{
+	for (var i = 0; i < photos.length; i++) {
+		var curPhoto = photos[i];
+		
+		$("#" + elementID).append(
+			"<li class=\"IMG\">" +
+			"<a href=\"" + curPhoto.url + "\">" +
+			"<img style=\"float: left; margin-right: 20px;\" src=\"" + curPhoto.url + "\" width=\"300\" height=\"300\"></a>" +
+			"<p>Latitude: " + curPhoto.latitude + "</p>" +
+			"<p>Longitude: " + curPhoto.longitude + "</p>" +
+			"<p>Direction: " + curPhoto.direction + "</p>" +
+			"<p>Timestamp: " + curPhoto.timestamp + "</p>" +
+			"<input id=\"wishButton" + i + "\" type=\"button\" value=\"Add to Wishlist\"/>" +
+			"</li>" +
+			"<br/>" + 
+			"<br/>"
+		);
+	}
 }
 
 /* DISCARDED */

@@ -4,6 +4,7 @@
 }
 
 #wishList {
+	padding-top: 150px;
 	display: none
 }
 
@@ -17,6 +18,10 @@
 
 #wishList > ul {
 	list-style: none;
+}
+
+li.IMG {
+	margin-bottom: 150px;
 }
 
 body { padding-top: 45px; }
