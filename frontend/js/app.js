@@ -5,6 +5,8 @@ $(document).ready(function initialize() {
 	$("#wishLink").click(showWishlist);
 	
 	$("#uploadPhoto").change(photoUpload);
+	
+	$(".wishButton").click(function() { alert("TEST!"); });
 
 	initializeMap();
 });
@@ -146,25 +148,8 @@ function popOutPhoto(dataMarker, mapMarker) {
 						
 						showPhotoList(photos, "PhotoListPhotos");
 						
-						/*
-						for (var i = 0; i < photos.length; i++) {
-							var curPhoto = photos[i];
-							
-							$("#PhotoListPhotos").append( 
-								"<li class=\"IMG\">" +
-								"<a href=\"" + curPhoto.url + "\">" +
-								"<img style=\"float: left; margin-right: 20px;\" src=\"" + curPhoto.url + "\" width=\"300\" height=\"300\"></a>" +
-								"<p>Latitude: " + curPhoto.latitude + "</p>" +
-								"<p>Longitude: " + curPhoto.longitude + "</p>" +
-								"<p>Direction: " + curPhoto.direction + "</p>" +
-								"<p>Timestamp: " + curPhoto.timestamp + "</p>" +
-								"<input id=\"wishButton" + i + "\" type=\"button\" value=\"Add to Wishlist\"/>" +
-								"</li>" +
-								"<br/>" + 
-								"<br/>"
-							);
-						}
-						*/
+						$(".wishButton").attr('value', 'Add to Wishlist');
+						
 					}
 				});
 				
@@ -217,6 +202,7 @@ function photoUpload(evt) {
 				type: 'POST',
 				success: function(data) {
 					console.log("PhotoUpload() AJAX successful API POST.");
+					alert("Your photo has been uploaded!");
 				}
 			});
         }
@@ -227,6 +213,7 @@ function photoUpload(evt) {
 
 /* WISHLIST */
 
+// Show the wishlist
 function showWishlist() {
 	console.log("WishList clicked");
 	
@@ -249,34 +236,143 @@ function showWishlist() {
 			var photos = data;
 					
 			showPhotoList(photos, "WishListPhotos");
-			
-			/*
-			for (var i = 0; i < photos.length; i++) {
-				var curPhoto = photos[i];
-				
-				$("#WishListPhotos").append(
-					"<li class=\"IMG\">" +
-					"<a href=\"" + curPhoto.url + "\">" +
-					"<img style=\"float: left; margin-right: 20px;\" src=\"" + curPhoto.url + "\" width=\"300\" height=\"300\"></a>" +
-					"<p>Latitude: " + curPhoto.latitude + "</p>" +
-					"<p>Longitude: " + curPhoto.longitude + "</p>" +
-					"<p>Direction: " + curPhoto.direction + "</p>" +
-					"<p>Timestamp: " + curPhoto.timestamp + "</p>" +
-					"<input id=\"wishButton" + i + "\" type=\"button\" value=\"Add to Wishlist\"/>" +
-					"</li>" +
-					"<br/>" + 
-					"<br/>"
-				);
-			}
-			*/
-			
-			$("#wishButton1").click(function() { alert("TEST!"); });
 		}
 	});
 	
 	$("#wishList").css('display', 'inline');
 }
 
+// Add a given photo to the user's wishlist
+function addPhotoToWishlist(photo, ID) {
+	console.log("Adding photo " + photo + " to wishlist...");
+	
+	// POST photo to user's wishlist
+	$.ajax({
+		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist",
+		context: document.body,		
+		data: {'photoid': photo.photoid},
+		type: 'POST',
+		success: function(data) {
+			console.log("addPhotoToWishlist() AJAX successful API POST.");
+			alert("Photo added to your wishlist.");
+			
+			// Change buttons
+			$("#wishButton" + ID).css('display', 'none');
+			$("#remWishButton" + ID).css('display', 'inline');
+		},
+		error: function(data) {
+			alert("Couldn't add photo to wishlist.");
+		}
+	});
+}
+
+// Remove a given photo from the user's wishlist
+// ID is the ID of the attribute of the button clicked
+function deletePhotoFromWishlist(photo, ID) {
+	console.log("Deleting photo " + photo.WID + " from wishlist...");
+	
+	// DELETE photo from user's wishlist
+	$.ajax({
+		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist/" + photo.WID,
+		context: document.body,
+		type: 'DELETE',
+		//type: 'POST',
+		//headers: {'X-HTTP-Method-Override': 'DELETE'},
+		success: function(data) {
+			console.log("deletePhotoFromWishlist() AJAX successful API DELETE.");
+			alert("Photo removed from your wishlist.");
+
+			// Change buttons
+			$("#remWishButton" + ID).css('display', 'none');
+			$("#wishButton" + ID).css('display', 'inline');
+		},
+		error: function(data) {
+			alert("Couldn't delete photo from wishlist.");
+		}
+	});
+}
+
+/* OTHER */
+
+// Helper function, display photos and their information on a given element
+// Creates anchors to other functions
+// var photos should hold an array of photo objects (Danny's API format) to display
+// var elementID should hold the string of the element to append the photos to
+function showPhotoList(photos, elementID)
+{
+	for (var i = 0; i < photos.length; i++) {
+		var curPhoto = photos[i];
+		var buttonsToAppend = ""; // HTML for buttons to append
+		
+		if ("WishListPhotos" == elementID) {
+			buttonsToAppend = "<input class=\"wishButton\" id=\"wishButton" + i + "\" type=\"button\" value=\"Add to Wishlist\" style=\"display: none; float: left;\"/>" +
+			"<input class=\"remWishButton\" id=\"remWishButton" + i + "\" type=\"button\" value=\"Remove from Wishlist\" style=\"display: inline; float: left;\"/>";
+		} else if ("PhotoListPhotos" == elementID) {
+			if (null != photos.wishlisted) {
+				buttonsToAppend = "<input class=\"wishButton\" id=\"wishButton" + i + "\" type=\"button\" value=\"Add to Wishlist\" style=\"display: none;\"/>" +
+				"<input class=\"remWishButton\" id=\"remWishButton" + i + "\" type=\"button\" value=\"Remove from Wishlist\" style=\"display: inline;\"/>";
+			} else {
+				buttonsToAppend = "<input class=\"wishButton\" id=\"wishButton" + i + "\" 	type=\"button\" value=\"Add to Wishlist\" style=\"display: inline;\"/>" +
+				"<input class=\"remWishButton\" id=\"remWishButton" + i + "\" type=\"button\" value=\"Remove from Wishlist\" style=\"display: none;\"/>";
+			}
+		} else {
+			console.log("Not a wishlist or photolist.");
+		}
+		
+		$("#" + elementID).append(
+			"<li class=\"IMG\">" +
+			"<a href=\"" + curPhoto.url + "\">" +
+			"<img style=\"float: left; margin-right: 20px; margin-bottom: 0px;\" src=\"" + curPhoto.url + "\" width=\"300\" height=\"300\"></a>" +
+			"<p>Latitude: " + curPhoto.latitude + "</p>" +
+			"<p>Longitude: " + curPhoto.longitude + "</p>" +
+			"<p>Direction: " + curPhoto.direction + "</p>" +
+			"<p>Timestamp: " + curPhoto.timestamp + "</p>" +
+			buttonsToAppend + // Buttons HTML
+			"</li>"
+		);
+	}
+	
+	$(".wishButton").click(function() { 
+		var buttonID = $(this).attr("id");
+		console.log("WishlistButtonID: " + buttonID);
+		
+		var ID = $(this).attr("id").substring(10, 11);
+		console.log("General ID: " + ID);
+		
+		addPhotoToWishlist(photos[ID], ID); // Buttons changed if call is successful
+	});
+	
+	$(".remWishButton").click(function() {
+		var buttonID = $(this).attr("id");
+		console.log("RemWishlistButtonID: " + buttonID);
+		
+		var ID = $(this).attr("id").substring(13, 14);
+		console.log("General ID: " + ID);
+		
+		deletePhotoFromWishlist(photos[ID], ID); // Buttons changed if call is successful
+	});
+}
+
+// ?
+function clearOverlays() {
+	for (var i = 0; i < Markers.length; i++ ) {
+		Markers[i].setMap(null);
+	}
+	
+	Markers = [];
+}
+
+/* DISCARDED */
+
+/*
+function createMapMarkers(dataMarkers) {
+	for (var j = 0; j < dataMarkers.length; j++) {	
+		addMapMarker(dataMarkers[j]);
+	}
+}
+*/
+
+/*
 function updatePopularity(id) {
     $.ajax({
         url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo/"+id,
@@ -288,48 +384,5 @@ function updatePopularity(id) {
 			console.log("updatePopularity() AJAX success.");
         }
     });
-}
-
-/* OTHER */
- 
-function clearOverlays() {
-	for (var i = 0; i < Markers.length; i++ ) {
-		Markers[i].setMap(null);
-	}
-	
-	Markers = [];
-}
-
-// Helper function, display photos and their information on a given element
-// var photos should hold an array of photo objects (Danny's API format) to display
-// var elementID should hold the string of the element to append the photos to
-function showPhotoList(photos, elementID)
-{
-	for (var i = 0; i < photos.length; i++) {
-		var curPhoto = photos[i];
-		
-		$("#" + elementID).append(
-			"<li class=\"IMG\">" +
-			"<a href=\"" + curPhoto.url + "\">" +
-			"<img style=\"float: left; margin-right: 20px;\" src=\"" + curPhoto.url + "\" width=\"300\" height=\"300\"></a>" +
-			"<p>Latitude: " + curPhoto.latitude + "</p>" +
-			"<p>Longitude: " + curPhoto.longitude + "</p>" +
-			"<p>Direction: " + curPhoto.direction + "</p>" +
-			"<p>Timestamp: " + curPhoto.timestamp + "</p>" +
-			"<input id=\"wishButton" + i + "\" type=\"button\" value=\"Add to Wishlist\"/>" +
-			"</li>" +
-			"<br/>" + 
-			"<br/>"
-		);
-	}
-}
-
-/* DISCARDED */
-
-/*
-function createMapMarkers(dataMarkers) {
-	for (var j = 0; j < dataMarkers.length; j++) {	
-		addMapMarker(dataMarkers[j]);
-	}
 }
 */
