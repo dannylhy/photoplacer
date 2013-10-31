@@ -5,8 +5,6 @@ $(document).ready(function initialize() {
 	$("#wishLink").click(showWishlist);
 	
 	$("#uploadPhoto").change(photoUpload);
-	
-	$(".wishButton").click(function() { alert("TEST!"); });
 
 	initializeMap();
 });
@@ -20,6 +18,7 @@ var Level = 0; // Zoom level
 
 /* FUNCTIONS */
 
+// Create Google Map and display markers for photos
 function initializeMap() {
 	mapOptions = {
         center: new google.maps.LatLng(33.776454, -84.397647),
@@ -53,7 +52,8 @@ function showMapMarkers() {
         }
     });
 }
- 
+
+// Add a marker to the map according to the data
 function addMapMarker(dataMarker) {
     var mapMarker = new google.maps.Marker({
         position: new google.maps.LatLng(dataMarker.latitude, dataMarker.longitude),
@@ -264,6 +264,19 @@ function addPhotoToWishlist(photo, ID) {
 			alert("Couldn't add photo to wishlist.");
 		}
 	});
+	
+	
+	
+	// UPDATE popularity of the photo wishlisted (PUT)
+	$.ajax({
+		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo/" + photo.photoid,
+		context: document.body,
+		headers: {'X-HTTP-Method-Override': 'PUT'},
+		type: 'POST',
+		success: function(data) {
+			console.log("addPhotoToWishlist() AJAX successful API PUT.");
+		}
+	});
 }
 
 // Remove a given photo from the user's wishlist
@@ -275,9 +288,9 @@ function deletePhotoFromWishlist(photo, ID) {
 	$.ajax({
 		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist/" + photo.WID,
 		context: document.body,
-		type: 'DELETE',
-		//type: 'POST',
-		//headers: {'X-HTTP-Method-Override': 'DELETE'},
+		//type: 'DELETE',
+		type: 'POST',
+		headers: {'X-HTTP-Method-Override': 'DELETE'},
 		success: function(data) {
 			console.log("deletePhotoFromWishlist() AJAX successful API DELETE.");
 			alert("Photo removed from your wishlist.");
@@ -323,6 +336,7 @@ function showPhotoList(photos, elementID)
 			"<li class=\"IMG\">" +
 			"<a href=\"" + curPhoto.url + "\">" +
 			"<img style=\"float: left; margin-right: 20px; margin-bottom: 0px;\" src=\"" + curPhoto.url + "\" width=\"300\" height=\"300\"></a>" +
+			"<p>Popularity: " + curPhoto.popularity + "</p>" +
 			"<p>Latitude: " + curPhoto.latitude + "</p>" +
 			"<p>Longitude: " + curPhoto.longitude + "</p>" +
 			"<p>Direction: " + curPhoto.direction + "</p>" +
