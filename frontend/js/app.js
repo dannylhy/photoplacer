@@ -136,7 +136,7 @@ function popOutPhoto(dataMarker, mapMarker) {
 					context: document.body,
 					success: function(data) {
 						console.log("getPopularPhotos() AJAX success.");
-						console.log("API url: " + "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/" + PrevMarkerID + "/zoom");
+						console.log("API url: " + "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/" + PrevMarkerID + "/zoom" + dataMarker.id);
 						
 						//var photos = jQuery.parseJSON(data);
 						var photos = data;
@@ -346,11 +346,15 @@ function showPhotoList(photos, elementID)
 		);
 	}
 	
+	var IDpattern = new RegExp("[0-9]+");
+	
 	$(".wishButton").click(function() { 
 		var buttonID = $(this).attr("id");
 		console.log("WishlistButtonID: " + buttonID);
 		
-		var ID = $(this).attr("id").substring(10, 11);
+		var ID = IDpattern.exec($(this).attr("id"));
+		
+		//var ID = $(this).attr("id").substring(10, 11);
 		console.log("General ID: " + ID);
 		
 		addPhotoToWishlist(photos[ID], ID); // Buttons changed if call is successful
@@ -360,7 +364,9 @@ function showPhotoList(photos, elementID)
 		var buttonID = $(this).attr("id");
 		console.log("RemWishlistButtonID: " + buttonID);
 		
-		var ID = $(this).attr("id").substring(13, 14);
+		var ID = IDpattern.exec($(this).attr("id"));
+		
+		//var ID = $(this).attr("id").substring(13, 14);
 		console.log("General ID: " + ID);
 		
 		deletePhotoFromWishlist(photos[ID], ID); // Buttons changed if call is successful
@@ -375,28 +381,3 @@ function clearOverlays() {
 	
 	Markers = [];
 }
-
-/* DISCARDED */
-
-/*
-function createMapMarkers(dataMarkers) {
-	for (var j = 0; j < dataMarkers.length; j++) {	
-		addMapMarker(dataMarkers[j]);
-	}
-}
-*/
-
-/*
-function updatePopularity(id) {
-    $.ajax({
-        url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo/"+id,
-        context: document.body,
-        data: {'photoid': id},
-        headers: {'X-HTTP-Method-Override': 'PUT'},
-        type: 'POST',
-        success: function(data) {
-			console.log("updatePopularity() AJAX success.");
-        }
-    });
-}
-*/
