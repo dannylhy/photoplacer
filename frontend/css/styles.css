@@ -3,24 +3,25 @@
     height:800px;
 }
 
+#wishList {
+	padding-top: 100px;
+	display: none
+}
+
+#photoList {
+	display: none
+}
+
+#photoList > ul {
+	list-style: none;
+}
+
+#wishList > ul {
+	list-style: none;
+}
+
+li.IMG {
+	margin-bottom: 230px;
+}
+
 body { padding-top: 45px; }
-
-#wishlistBody {
-	padding-top: 55px;
-} 
-
-garbage {
-position:absolute;
-	top:0;
-	bottom:0;
-	left:0;
-	right:0;
-}
-
-#main{
-	display: inline;
-}
-
-#wishlist{
-	display: inline;
-}
