@@ -9,16 +9,16 @@
 			echo "Error. No username entered";
 			return;
 		}
-		#$dbQuery = sprintf("SELECT p.PH_ID AS photoid, p.url, X(p.lat_lng) AS latitude, Y(p.lat_lng) AS longitude, p.altitude, p.direction, p.timestamp, p.popularity, w.WID 
-		#	FROM photos p 
-		#	INNER JOIN wishlist w ON p.PH_ID = w.PH_ID 
-		#	INNER JOIN users u ON w.UID = u.UID 
-		#	WHERE u.username = '%s'",$username);
-		
-		$dbQuery = sprintf("SELECT w.PH_ID AS photoid, w.WID AS w_id 
-			FROM wishlist w 
+		$dbQuery = sprintf("SELECT p.PH_ID AS photoid, p.url, X(p.lat_lng) AS latitude, Y(p.lat_lng) AS longitude, p.altitude, p.direction, p.timestamp, p.popularity, w.WID 
+			FROM photos p 
+			INNER JOIN wishlist w ON p.PH_ID = w.PH_ID 
 			INNER JOIN users u ON w.UID = u.UID 
-			WHERE u.username = '%s'", $username);
+			WHERE u.username = '%s'",$username);
+		
+		#$dbQuery = sprintf("SELECT w.PH_ID AS photoid, w.WID AS w_id 
+		#	FROM wishlist w 
+		#	INNER JOIN users u ON w.UID = u.UID 
+		#	WHERE u.username = '%s'", $username);
 		$result = getDBResultsArray($dbQuery);
 		
 		header("Content-type: application/json");
@@ -79,7 +79,19 @@
 		header("Content-type: application/json");
 		echo json_encode($result);
 	}
-	
+	/*
+	function checkPermission($id) {
+		global $_USER;
+		$user = $_USER["uid"];
+		$dbQuery = sprintf("SELECT username from users where username = '%s'",
+					mysql_real_escape_string($id));
+		$result = getDBResultRecord($dbQuery);
+		if ($result["user"] != $user) {
+			$GLOBALS["_PLATFORM"]->sandboxHeader('HTTP/1.1 401 Unauthorized');
+			die();
+		}
+	}
+	*/
 	# Deletes an entry from the wishlist
 	function deleteWishlistEntry($username, $w_id) {
 		if ($username == "") {

@@ -19,21 +19,52 @@
 	}
 
 	# Gets a single photo from the db based on the photoid
-	function getPhoto($photoid) {
-		$dbQuery = sprintf("
-			SELECT p.PH_ID AS photoid, p.url, X(p.lat_lng) AS latitude, Y(p.lat_lng) AS longitude, p.altitude, p.direction, p.timestamp, p.popularity, u.username, GROUP_CONCAT(t.text) AS tags 
-			FROM (
-				SELECT * 
-				FROM photos 
-				WHERE PH_ID = %s
-			) p
-			LEFT JOIN photo_tag_link l
-				ON p.PH_ID = l.PH_ID
-			LEFT JOIN tags t
-				ON l.TAG_ID = t.TAG_ID
-			LEFT JOIN users u
-				ON p.UID = u.UID
-			GROUP BY p.PH_ID", $photoid);
+	function getPhoto($photoid, $username) {
+		if (!empty($username)) {
+			$dbQuery = sprintf("
+				SELECT UID 
+				FROM users 
+				WHERE username = '%s'", 
+				$username);
+			$result = getDBResultRecord($dbQuery);
+			$uidstr = $result['UID'];
+			
+			$dbQuery = sprintf("
+				SELECT p.PH_ID AS photoid, p.url, X(p.lat_lng) AS latitude, Y(p.lat_lng) AS longitude, p.altitude, p.direction, p.timestamp, p.popularity, u.username, wishlisted, GROUP_CONCAT(t.text) AS tags 
+				FROM (
+					SELECT * 
+					FROM photos 
+					WHERE PH_ID = %s
+				) p
+				LEFT JOIN photo_tag_link l
+					ON p.PH_ID = l.PH_ID
+				LEFT JOIN tags t
+					ON l.TAG_ID = t.TAG_ID
+				LEFT JOIN users u
+					ON p.UID = u.UID
+				LEFT JOIN (
+					SELECT 1 AS wishlisted, w.PH_ID 
+					FROM wishlist w
+					WHERE w.UID = %d AND w.PH_ID = %d
+				) wl 
+					ON wl.PH_ID = p.PH_ID
+				GROUP BY p.PH_ID", $photoid, $uidstr, $photoid);
+		} else {
+			$dbQuery = sprintf("
+				SELECT p.PH_ID AS photoid, p.url, X(p.lat_lng) AS latitude, Y(p.lat_lng) AS longitude, p.altitude, p.direction, p.timestamp, p.popularity, u.username, null AS wishlisted, GROUP_CONCAT(t.text) AS tags 
+				FROM (
+					SELECT * 
+					FROM photos 
+					WHERE PH_ID = %s
+				) p
+				LEFT JOIN photo_tag_link l
+					ON p.PH_ID = l.PH_ID
+				LEFT JOIN tags t
+					ON l.TAG_ID = t.TAG_ID
+				LEFT JOIN users u
+					ON p.UID = u.UID
+				GROUP BY p.PH_ID", $photoid);
+		}
 		$result=getDBResultRecord($dbQuery);
 		header("Content-type: application/json");
 		echo json_encode($result);

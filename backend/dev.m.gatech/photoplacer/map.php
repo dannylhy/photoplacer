@@ -57,13 +57,39 @@
 	}
 	
 	# Gets the details of photos at the zoomed location
-	function getPhotosAtZoomedLocation($lid1, $lid2) {
-		$dbQuery = sprintf("
-			SELECT p.PH_ID AS photoid, p.url, X(p.lat_lng) AS latitude, Y(p.lat_lng) AS longitude, p.altitude, p.direction, p.timestamp, p.popularity
-			FROM photos p
-			INNER JOIN location_photo_link l ON p.PH_ID = l.PH_ID
-			WHERE l.LID_1 = %d AND l.LID_2 = %d
-			ORDER BY p.popularity DESC", $lid1, $lid2);
+	function getPhotosAtZoomedLocation($lid1, $lid2, $username) {
+		# Get the UID for the selected username
+
+		if (!empty($username)) {
+			$dbQuery = sprintf("
+				SELECT UID 
+				FROM users 
+				WHERE username = '%s'", 
+				$username);
+			$result = getDBResultRecord($dbQuery);
+			$uidstr = $result['UID'];
+			
+			$dbQuery = sprintf("
+				SELECT p.PH_ID AS photoid, p.url, X(p.lat_lng) AS latitude, Y(p.lat_lng) AS longitude, p.altitude, p.direction, p.timestamp, p.popularity, wishlisted
+				FROM photos p
+				INNER JOIN location_photo_link l 
+					ON p.PH_ID = l.PH_ID
+				LEFT JOIN (
+					SELECT 1 AS wishlisted, w.PH_ID 
+					FROM wishlist w
+					WHERE w.UID = %d
+				) wl 
+					ON wl.PH_ID = p.PH_ID
+				WHERE l.LID_1 = %d AND l.LID_2 = %d
+				ORDER BY p.popularity DESC", $uidstr, $lid1, $lid2);
+		} else {
+			$dbQuery = sprintf("
+				SELECT p.PH_ID AS photoid, p.url, X(p.lat_lng) AS latitude, Y(p.lat_lng) AS longitude, p.altitude, p.direction, p.timestamp, p.popularity, null AS wishlisted
+				FROM photos p
+				INNER JOIN location_photo_link l ON p.PH_ID = l.PH_ID
+				WHERE l.LID_1 = %d AND l.LID_2 = %d
+				ORDER BY p.popularity DESC", $lid1, $lid2);
+		}
 		
 		$result = getDBResultsArray($dbQuery);
 		
