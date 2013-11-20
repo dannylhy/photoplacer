@@ -1,6 +1,7 @@
 <?php
 	include 'db_helper.php';
 	include 'system_params.php';
+	include 'cluster.php';
 	
 	# Gets all photos with an optional limit
 	function getAllPhotos($limit) {
@@ -72,10 +73,12 @@
 
 	# Adds a photo to the db
 	function addPhoto($url, $timestamp, $latitude, $longitude, $altitude, $direction, $username, $tags) {
-		if (empty($altitude))
+		if (empty($altitude)) {
 			$altitude = "NULL";
-		if (empty($direction))
+		}
+		if (empty($direction)) {
 			$direction = "NULL";
+		}
 		
 		# Get the UID for the selected username
 		$uidstr = "NULL";
@@ -114,6 +117,27 @@
 				)";
 			$result = getDBResultInserted($dbQuery);
 		}
+
+		# Clustering
+		$clusterLIDs = getLIDs($latitude, $longitude);
+		$dbQuery = sprintf("
+			INSERT INTO location_photo_link (LID_1, LID_2, PH_ID) 
+			VALUES (%s, %s, %s)", 
+			$clusterLIDs['LID_1'], $clusterLIDs['LID_2'], $newPhotoId);
+		$result = getDBResultInserted($dbQuery);
+		recalculateLID2($clusterLIDs['LID_2']);
+		$dbQuery = sprintf("
+			UPDATE locations_zoomout 
+			SET photocount = photocount+1 
+			WHERE LID_1 = %s", 
+			$clusterLIDs['LID_1']);
+		$result = getDBResultAffected($dbQuery);
+		$dbQuery = sprintf("
+			UPDATE locations_zoomin 
+			SET photocount = photocount+1 
+			WHERE LID_2 = %s", 
+		 	$clusterLIDs['LID_2']);
+		$result = getDBResultAffected($dbQuery);
 		
 		header("Content-type: application/json");
 		echo json_encode($insertResult);
