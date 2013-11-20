@@ -168,7 +168,6 @@ function photoUpload(evt) {
 	console.log("PhotoUpload button clicked.");
 	
 	var file = evt.target.files[0];
-	console.log("File: " + file);
 	
 	if (!file || !file.type.match(/image.*/))
 	{
@@ -178,37 +177,111 @@ function photoUpload(evt) {
 	
 	document.body.className = "uploading";
 	
-	// Upload File to Imgur
-	var fd = new FormData(); 
-    fd.append("image", file); 
-        
-	var xhr = new XMLHttpRequest(); 
-    xhr.open("POST", "https://api.imgur.com/3/image.json"); 
-        xhr.onload = function() {
+	// This is all probably very insecure, but my group members didn't want to do this the proper way (you know, like, server-side, or getting location data from a mobile device... since this supposedly is a mobile app...).
+	
+	var dataToSend = {};
+	dataToSend.timestamp = '2000-01-01 00:00:00';
+	dataToSend.latitude = 0.0;
+	dataToSend.longitude = 0.0;
+	dataToSend.altitude = null;
+	dataToSend.direction = null;
+	
+	var FR = new FileReader();
+	
+	FR.onload = function (evt) {
+		try { // Get EXIF Data
+			var exif = new ExifReader();
+			exif.load(evt.target.result);
+			
+			var EXIFData = exif.getAllTags();
+			console.log(EXIFData);
+			
+			if (EXIFData) {
+				// Timestamp
+				if (EXIFData.DateTimeOriginal && EXIFData.DateTimeOriginal.description) {
+					/* Parse since wrong format for our PHP backend. 
+						'2013:11:19 18:51:17' -> '2013-11-19 18:51:17' */
+					var description = EXIFData.DateTimeOriginal.description;
+						
+					description = description.replace(":", "-");
+					description = description.replace(":", "-");
+					
+					dataToSend.timestamp = description;
+				}
+				
+				// Altitude
+				if (EXIFData.GPSAltitude && (EXIFData.GPSAltitude.value != null))
+					dataToSend.altitude = EXIFData.GPSAltitude.value;
+				
+				// Direction
+				if (EXIFData.GPSImgDirection && (EXIFData.GPSImgDirection.value != null))
+					dataToSend.direction = EXIFData.GPSImgDirection.value;
+				
+				// Latitude
+				if (EXIFData.GPSLatitude && EXIFData.GPSLatitude.description) {
+					dataToSend.latitude = EXIFData.GPSLatitude.description;
+					
+					if ((EXIFData.GPSLatitudeRef && EXIFData.GPSLatitudeRef.description) &&
+					    ("South latitude" == EXIFData.GPSLatitudeRef.description))
+							dataToSend.latitude *= -1;
+				}
+					
+				// Longitude
+				if (EXIFData.GPSLongitude && EXIFData.GPSLongitude.description) {
+					dataToSend.longitude = EXIFData.GPSLongitude.description;
+					
+					if ((EXIFData.GPSLongitudeRef && EXIFData.GPSLongitudeRef.description) &&
+						("West longitude" == EXIFData.GPSLongitudeRef.description))
+							dataToSend.longitude *= -1;
+				}
+				
+				
+				console.log("data: " + dataToSend);
+				console.log("timestamp: " + dataToSend.timestamp);
+				console.log("latitude: " + dataToSend.latitude);
+				console.log("longitude: " + dataToSend.longitude);
+				console.log("altitude: " + dataToSend.altitude);
+				console.log("direction: " + dataToSend.direction);
+				
+			}
+		}
+		catch (error) {
+			console.log(error);
+		}
+			
+		// Upload to IMGUR
+		var fd = new FormData(); 
+		fd.append("image", file);
+		
+		var xhr = new XMLHttpRequest(); 
+		xhr.open("POST", "https://api.imgur.com/3/image.json"); 
+		xhr.onload = function() {
 			console.log("PhotoUpload() AJAX successful IMGUR POST.");
 			var link = JSON.parse(xhr.responseText).data.link
-            console.log("link: " + link);
-            document.body.className = "uploaded";
-			
-			// Construct data object to send
-			var data = {'url': link, 'latitude': '1.4', 'longitude': '2.5', 'altitude': null, 'direction': null, 'timestamp': '2013-10-10 13:27:00'};
+			console.log("link: " + link);
+			document.body.className = "uploaded";
+			dataToSend.url = link;
 			
 			// Post URL to PhotoPlacer API
 			$.ajax({
 				url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo",
 				context: document.body,
-				//data: data,				
-				data: {'url': link, 'latitude': '1.4', 'longitude': '2.5', 'altitude': null, 'direction': null, 'timestamp': '2013-10-10 13:27:00'},
+				data: dataToSend,
 				type: 'POST',
 				success: function(data) {
 					console.log("PhotoUpload() AJAX successful API POST.");
 					alert("Your photo has been uploaded!");
 				}
 			});
-        }
-        
-    xhr.setRequestHeader('Authorization', 'Client-ID 6f94f078334088f');
-	xhr.send(fd);
+		}
+			
+		xhr.setRequestHeader('Authorization', 'Client-ID 6f94f078334088f');
+		xhr.send(fd);
+		
+		// End of Upload to IMGUR
+	}
+	
+	FR.readAsArrayBuffer(file);
 }
 
 /* WISHLIST */
