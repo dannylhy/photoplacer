@@ -168,7 +168,7 @@ function photoUpload(evt) {
 	console.log("PhotoUpload button clicked.");
 	
 	var file = evt.target.files[0];
-	console.log("File: " + file);
+	//console.log("File: " + file);
 	
 	if (!file || !file.type.match(/image.*/))
 	{
@@ -178,9 +178,77 @@ function photoUpload(evt) {
 	
 	document.body.className = "uploading";
 	
+	// This is all probably very insecure, but my group members didn't want to do this the proper way (you know, like, server-side, or getting location data from a mobile device... since this supposedly is a mobile app...).
+	//var data = {'url': link, 'latitude': '1.4', 'longitude': '2.5', 'altitude': null, 'direction': null, 'timestamp': '2013-10-10 13:27:00'};
+	
+	// This will be sent to 
+	var data = {};
+	
+	var FR = new FileReader();
+	
+	FR.onload = function (evt) {
+		try {
+			var exif = new ExifReader();
+			exif.load(evt.target.result);
+			
+			// Get EXIF Data
+			var EXIFData = exif.getAllTags();
+			console.log(EXIFData);
+			
+			if (EXIFData.DateTimeOriginal && EXIFData.DateTimeOriginal.description) {
+				// Parse since wrong format for our PHP backend. '2013:11:19 18:51:17' -> '2013-11-19 18:51:17'
+				var description = EXIFData.DateTimeOriginal.description;
+					
+				description = description.replace(":", "-");
+				description = description.replace(":", "-");
+				
+				data.timestamp = description;
+			} else
+				data.timestamp = '2000-01-01 00:00:00';
+			
+			if (EXIFData.GPSLatitude && EXIFData.GPSLatitude.description) {
+				if (EXIFData.GPSLatitudeRef && EXIFData.GPSLatitudeRef.description) {
+					if ("North latitude" == EXIFData.GPSLatitudeRef.description)
+						data.latitude = EXIFData.GPSLatitude.description;
+					else if ("South latitude" == EXIFData.GPSLatitudeRef.description)
+						data.latitude = -EXIFData.GPSLatitude.description;
+					else
+						data.latitude = EXIFData.GPSLatitude.description;
+				} else
+					data.latitude = EXIFData.GPSLatitude.description;
+			} else
+				data.latitude = 0.0;
+				
+			if (EXIFData.GPSLongitude && EXIFData.GPSLongitude.description) {
+				if (EXIFData.GPSLongitudeRef && EXIFData.GPSLongitudeRef.description) {
+					if ("East longitude" == EXIFData.GPSLongitudeRef.description)
+						data.longitude = EXIFData.GPSLongitude.description;
+					else if ("West longitude" == EXIFData.GPSLongitudeRef.description)
+						data.longitude = -EXIFData.GPSLongitude.description;
+					else
+						data.longitude = EXIFData.GPSLongitude.description;
+				} else
+					data.longitude = EXIFData.GPSLongitude.description;
+			} else
+				data.longitude = 0.0;
+			
+			console.log("data: " + data);
+			console.log("timestamp: " + data.timestamp);
+			console.log("latitude: " + data.latitude);
+			console.log("longitude: " + data.longitude);
+			
+		}
+		catch (error) {
+				alert(error);
+		}
+	}
+	
+	FR.readAsArrayBuffer(file);
+	
 	// Upload File to Imgur
+	/*
 	var fd = new FormData(); 
-    fd.append("image", file); 
+    fd.append("image", file);
         
 	var xhr = new XMLHttpRequest(); 
     xhr.open("POST", "https://api.imgur.com/3/image.json"); 
@@ -191,7 +259,8 @@ function photoUpload(evt) {
             document.body.className = "uploaded";
 			
 			// Construct data object to send
-			var data = {'url': link, 'latitude': '1.4', 'longitude': '2.5', 'altitude': null, 'direction': null, 'timestamp': '2013-10-10 13:27:00'};
+			//var data = {'url': link, 'latitude': '1.4', 'longitude': '2.5', 'altitude': null, 'direction': null, 'timestamp': '2013-10-10 13:27:00'};
+			data.url = link;
 			
 			// Post URL to PhotoPlacer API
 			$.ajax({
@@ -209,6 +278,7 @@ function photoUpload(evt) {
         
     xhr.setRequestHeader('Authorization', 'Client-ID 6f94f078334088f');
 	xhr.send(fd);
+	*/
 }
 
 /* WISHLIST */
