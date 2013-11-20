@@ -182,7 +182,7 @@ function photoUpload(evt) {
 	//var data = {'url': link, 'latitude': '1.4', 'longitude': '2.5', 'altitude': null, 'direction': null, 'timestamp': '2013-10-10 13:27:00'};
 	
 	// This will be sent to 
-	var data = {};
+	var dataToSend = {};
 	
 	var FR = new FileReader();
 	
@@ -202,41 +202,73 @@ function photoUpload(evt) {
 				description = description.replace(":", "-");
 				description = description.replace(":", "-");
 				
-				data.timestamp = description;
+				dataToSend.timestamp = description;
 			} else
-				data.timestamp = '2000-01-01 00:00:00';
+				dataToSend.timestamp = '2000-01-01 00:00:00';
 			
 			if (EXIFData.GPSLatitude && EXIFData.GPSLatitude.description) {
 				if (EXIFData.GPSLatitudeRef && EXIFData.GPSLatitudeRef.description) {
 					if ("North latitude" == EXIFData.GPSLatitudeRef.description)
-						data.latitude = EXIFData.GPSLatitude.description;
+						dataToSend.latitude = EXIFData.GPSLatitude.description;
 					else if ("South latitude" == EXIFData.GPSLatitudeRef.description)
-						data.latitude = -EXIFData.GPSLatitude.description;
+						dataToSend.latitude = -EXIFData.GPSLatitude.description;
 					else
-						data.latitude = EXIFData.GPSLatitude.description;
+						dataToSend.latitude = EXIFData.GPSLatitude.description;
 				} else
-					data.latitude = EXIFData.GPSLatitude.description;
+					dataToSend.latitude = EXIFData.GPSLatitude.description;
 			} else
-				data.latitude = 0.0;
+				dataToSend.latitude = 0.0;
 				
 			if (EXIFData.GPSLongitude && EXIFData.GPSLongitude.description) {
 				if (EXIFData.GPSLongitudeRef && EXIFData.GPSLongitudeRef.description) {
 					if ("East longitude" == EXIFData.GPSLongitudeRef.description)
-						data.longitude = EXIFData.GPSLongitude.description;
+						dataToSend.longitude = EXIFData.GPSLongitude.description;
 					else if ("West longitude" == EXIFData.GPSLongitudeRef.description)
-						data.longitude = -EXIFData.GPSLongitude.description;
+						dataToSend.longitude = -EXIFData.GPSLongitude.description;
 					else
-						data.longitude = EXIFData.GPSLongitude.description;
+						dataToSend.longitude = EXIFData.GPSLongitude.description;
 				} else
-					data.longitude = EXIFData.GPSLongitude.description;
+					dataToSend.longitude = EXIFData.GPSLongitude.description;
 			} else
-				data.longitude = 0.0;
+				dataToSend.longitude = 0.0;
 			
-			console.log("data: " + data);
-			console.log("timestamp: " + data.timestamp);
-			console.log("latitude: " + data.latitude);
-			console.log("longitude: " + data.longitude);
+			console.log("data: " + dataToSend);
+			console.log("timestamp: " + dataToSend.timestamp);
+			console.log("latitude: " + dataToSend.latitude);
+			console.log("longitude: " + dataToSend.longitude);
 			
+			// Upload to IMGUR
+			var fd = new FormData(); 
+			fd.append("image", file);
+			
+			var xhr = new XMLHttpRequest(); 
+			xhr.open("POST", "https://api.imgur.com/3/image.json"); 
+				xhr.onload = function() {
+					console.log("PhotoUpload() AJAX successful IMGUR POST.");
+					var link = JSON.parse(xhr.responseText).data.link
+					console.log("link: " + link);
+					document.body.className = "uploaded";
+					dataToSend.url = link;
+					
+					// Post URL to PhotoPlacer API
+					$.ajax({
+						url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo",
+						context: document.body,
+						//data: data,				
+						//data: {'url': link, 'latitude': '1.4', 'longitude': '2.5', 'altitude': null, 'direction': null, 'timestamp': '2013-10-10 13:27:00'},
+						data: dataToSend,
+						type: 'POST',
+						success: function(data) {
+							console.log("PhotoUpload() AJAX successful API POST.");
+							alert("Your photo has been uploaded!");
+						}
+					});
+				}
+				
+			xhr.setRequestHeader('Authorization', 'Client-ID 6f94f078334088f');
+			xhr.send(fd);
+			
+			// End of Upload to IMGUR
 		}
 		catch (error) {
 				alert(error);
