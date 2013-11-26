@@ -9,6 +9,11 @@ $(document).ready(function initialize() {
 	initializeMap();
 });
 
+/* CONSTANTS */
+
+var GT_LATITUDE = 33.7765;
+var GT_LONGITUDE = -84.4002;
+
 /* GLOBALS */
 
 var Map; // Reference to the Google API Map
@@ -68,6 +73,11 @@ function addMapMarker(dataMarker) {
 	google.maps.event.addListener(mapMarker, 'mouseover', function() {
 		photoCountIW.open(Map, mapMarker);
 	}); 
+	
+	google.maps.event.addListener(mapMarker, 'mouseout', function() {
+		photoCountIW.close();
+	}); 
+	
 	
 	// Base display level
 	if (0 == Level) {
@@ -181,8 +191,8 @@ function photoUpload(evt) {
 	
 	var dataToSend = {};
 	dataToSend.timestamp = '2000-01-01 00:00:00';
-	dataToSend.latitude = 0.0;
-	dataToSend.longitude = 0.0;
+	dataToSend.latitude = GT_LATITUDE;		// Default Georgia Tech Latitude
+	dataToSend.longitude = GT_LONGITUDE;	// Default Georgia Tech Longitude
 	dataToSend.altitude = null;
 	dataToSend.direction = null;
 	
@@ -248,37 +258,85 @@ function photoUpload(evt) {
 		catch (error) {
 			console.log(error);
 		}
-			
-		// Upload to IMGUR
-		var fd = new FormData(); 
-		fd.append("image", file);
 		
-		var xhr = new XMLHttpRequest(); 
-		xhr.open("POST", "https://api.imgur.com/3/image.json"); 
-		xhr.onload = function() {
-			console.log("PhotoUpload() AJAX successful IMGUR POST.");
-			var link = JSON.parse(xhr.responseText).data.link
-			console.log("link: " + link);
-			document.body.className = "uploaded";
-			dataToSend.url = link;
-			
-			// Post URL to PhotoPlacer API
-			$.ajax({
-				url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo",
-				context: document.body,
-				data: dataToSend,
-				type: 'POST',
-				success: function(data) {
-					console.log("PhotoUpload() AJAX successful API POST.");
-					alert("Your photo has been uploaded!");
+		// Before uploading, let the user move the Marker somewhere else, if desired
+		
+		// Create a temporary marker representing the guessed location
+		var tempMarker = new google.maps.Marker({
+			position: new google.maps.LatLng(dataToSend.latitude, dataToSend.longitude),
+			map: Map,
+			draggable:true
+		});
+		
+		// Attach the marker to the map
+		tempMarker.setMap(Map);
+		
+		// Temporary variables to keep track of the marker's position changes
+		var tempLatitude = tempMarker.position.lat() + .0000001;
+		var tempLongitude = tempMarker.position.lng();
+		
+		// Show label							
+		var contentString = "Is this the correct location? Drag marker to the desired location. Close this window when done.";
+		
+		var markerLabelIW = new google.maps.InfoWindow({content: contentString});
+		markerLabelIW.open(Map, tempMarker);
+		
+		Map.setCenter(tempMarker.getPosition());
+		
+		// Add listener to keep track of the marker being dragged
+		google.maps.event.addListener(
+			tempMarker,
+			'dragend',
+			function() {
+				tempLatitude = tempMarker.position.lat();
+				tempLongitude = tempMarker.position.lng();
+				
+				console.log("tempLatitude: " + tempLatitude);
+				console.log("tempLongitude: " + tempLongitude);
+			}
+		);
+		
+		// Add listener to keep track of the window being closed
+		google.maps.event.addListener(
+			markerLabelIW,
+			'closeclick',
+			function() {
+				dataToSend.latitude = tempLatitude;
+				dataToSend.longitude = tempLongitude;
+				
+				// Upload to IMGUR
+				var fd = new FormData(); 
+				fd.append("image", file);
+				
+				var xhr = new XMLHttpRequest(); 
+				xhr.open("POST", "https://api.imgur.com/3/image.json"); 
+				xhr.onload = function() {
+					console.log("PhotoUpload() AJAX successful IMGUR POST.");
+					var link = JSON.parse(xhr.responseText).data.link
+					console.log("link: " + link);
+					document.body.className = "uploaded";
+					dataToSend.url = link;
+					
+					// Post URL to PhotoPlacer API
+					$.ajax({
+						url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo",
+						context: document.body,
+						data: dataToSend,
+						type: 'POST',
+						success: function(data) {
+							console.log("PhotoUpload() AJAX successful API POST.");
+							alert("Your photo has been uploaded!");
+						}
+					});
 				}
-			});
-		}
-			
-		xhr.setRequestHeader('Authorization', 'Client-ID 6f94f078334088f');
-		xhr.send(fd);
-		
-		// End of Upload to IMGUR
+					
+				xhr.setRequestHeader('Authorization', 'Client-ID 6f94f078334088f');
+				xhr.send(fd);
+				// End of Upload to IMGUR
+				
+				tempMarker.setMap(null);
+			}
+		);
 	}
 	
 	FR.readAsArrayBuffer(file);
@@ -361,9 +419,9 @@ function deletePhotoFromWishlist(photo, ID) {
 	$.ajax({
 		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist/" + photo.WID,
 		context: document.body,
-		//type: 'DELETE',
-		type: 'POST',
-		headers: {'X-HTTP-Method-Override': 'DELETE'},
+		type: 'DELETE',
+		//type: 'POST',
+		//headers: {'X-HTTP-Method-Override': 'DELETE'},
 		success: function(data) {
 			console.log("deletePhotoFromWishlist() AJAX successful API DELETE.");
 			alert("Photo removed from your wishlist.");
