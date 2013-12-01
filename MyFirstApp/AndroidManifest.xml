@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.myfirstapp"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="18" />
+
+    <application
+        android:name="com.example.myfirstapp.Globals"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.example.myfirstapp.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.example.myfirstapp.DisplayMessageActivity"
+            android:label="@string/title_activity_display_message"
+            android:parentActivityName="com.example.myfirstapp.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.myfirstapp.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.example.myfirstapp.ListActivity"
+            android:label="@string/title_activity_list" >
+        </activity>
+        <activity
+            android:name="com.example.myfirstapp.PullActivity"
+            android:label="@string/title_activity_pull" >
+        </activity>
+        <activity
+            android:name="com.example.myfirstapp.CapActivity"
+            android:label="@string/title_activity_cap" >
+        </activity>
+        <activity
+            android:name="com.example.myfirstapp.DiffActivity"
+            android:label="@string/title_activity_diff" >
+        </activity>
+        <activity
+            android:name="com.example.myfirstapp.LeaveActivity"
+            android:label="@string/title_activity_leave" >
+        </activity>
+        <activity
+            android:name="com.example.myfirstapp.MapActivity"
+            android:label="@string/title_activity_map" >
+        </activity>
+        <activity
+            android:name="com.example.myfirstapp.WishlistActivity"
+            android:label="@string/title_activity_wishlist" >
+        </activity>
+        <activity
+            android:name="com.example.myfirstapp.PhotoTakeActivity"
+            android:label="@string/title_activity_photo_take" >
+        </activity>
+        <activity
+            android:name="com.example.myfirstapp.LoginActivity"
+            android:label="@string/title_activity_login" >
+        </activity>
+    </application>
+
+</manifest>
