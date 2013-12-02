@@ -1,12 +1,11 @@
 /* ON READY */
 
 $(document).ready(function initialize() {
-
 	$("#wishLink").click(showWishlist);
-	
 	$("#uploadPhoto").change(photoUpload);
 
 	initializeMap();
+	updateUsername();
 });
 
 /* CONSTANTS */
@@ -27,7 +26,7 @@ var Level = 0; // Zoom level
 function initializeMap() {
 	mapOptions = {
         center: new google.maps.LatLng(33.776454, -84.397647),
-        zoom: 17,
+        zoom: 16,
         zoomControl: false,
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
@@ -43,7 +42,7 @@ function initializeMap() {
 // Retrieve and display the level 0 map markers
 function showMapMarkers() {
 	$.ajax({
-		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map",
+		url: backendUrl + "map",
         context: document.body,
         success: function(data) {
 			console.log("getMapMarkers() AJAX successful.");
@@ -100,7 +99,7 @@ function addMapMarker(dataMarker) {
 // Requests the markers of the zoomed portion and shows them
 function showMapZoomMarkers(dataMarker) {
 	$.ajax({
-		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/" + dataMarker.id + "/zoom",
+		url: backendUrl + "map/" + dataMarker.id + "/zoom",
 		context: document.body,
 		success: function(data) {
 			console.log("mapZoomIndex() AJAX success.");
@@ -119,11 +118,11 @@ function showMapZoomMarkers(dataMarker) {
 // Show list of photos at last level
 function popOutPhoto(dataMarker, mapMarker) {
 	$.ajax({
-		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/" + PrevMarkerID + "/zoom/" + dataMarker.id,
+		url: backendUrl + "map/" + PrevMarkerID + "/zoom/" + dataMarker.id,
 		context: document.body,
 		success: function(data) {
 			console.log("popOutPhoto() AJAX successful.");
-			console.log("API url: " + "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/" + PrevMarkerID + "/zoom/" + dataMarker.id);
+			console.log("API url: " + backendUrl + "map/" + PrevMarkerID + "/zoom/" + dataMarker.id);
 			//var parsedData = jQuery.parseJSON(data);
 			var parsedData = data;
 						
@@ -142,11 +141,11 @@ function popOutPhoto(dataMarker, mapMarker) {
 		
 				// Retrieve a list of photos for the given marker
 				$.ajax({
-					url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/" + PrevMarkerID + "/zoom/" + dataMarker.id,
+					url: backendUrl + "map/" + PrevMarkerID + "/zoom/" + dataMarker.id,
 					context: document.body,
 					success: function(data) {
 						console.log("getPopularPhotos() AJAX success.");
-						console.log("API url: " + "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/map/" + PrevMarkerID + "/zoom" + dataMarker.id);
+						console.log("API url: " + backendUrl + "map/" + PrevMarkerID + "/zoom" + dataMarker.id);
 						
 						//var photos = jQuery.parseJSON(data);
 						var photos = data;
@@ -188,6 +187,8 @@ function photoUpload(evt) {
 	document.body.className = "uploading";
 	
 	// This is all probably very insecure, but my group members didn't want to do this the proper way (you know, like, server-side, or getting location data from a mobile device... since this supposedly is a mobile app...).
+	
+	// Other group member: Since images are going directly to imgur and the backend server never receives the jpeg, it cannot parse and extract the data from the exif. So this complaint doesn't make any sense.
 	
 	var dataToSend = {};
 	dataToSend.timestamp = '2000-01-01 00:00:00';
@@ -319,7 +320,7 @@ function photoUpload(evt) {
 					
 					// Post URL to PhotoPlacer API
 					$.ajax({
-						url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo",
+						url: backendUrl + "photo",
 						context: document.body,
 						data: dataToSend,
 						type: 'POST',
@@ -358,7 +359,7 @@ function showWishlist() {
 	
 	// Retrieve a list of photos for the given marker
 	$.ajax({
-		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist",
+		url: backendUrl + "wishlist",
 		context: document.body,
 		success: function(data) {
 			console.log("wishList index AJAX success.");
@@ -379,7 +380,7 @@ function addPhotoToWishlist(photo, ID) {
 	
 	// POST photo to user's wishlist
 	$.ajax({
-		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist",
+		url: backendUrl + "wishlist",
 		context: document.body,		
 		data: {'photoid': photo.photoid},
 		type: 'POST',
@@ -400,7 +401,7 @@ function addPhotoToWishlist(photo, ID) {
 	
 	// UPDATE popularity of the photo wishlisted (PUT)
 	$.ajax({
-		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/photo/" + photo.photoid,
+		url: backendUrl + "photo/" + photo.photoid,
 		context: document.body,
 		headers: {'X-HTTP-Method-Override': 'PUT'},
 		type: 'POST',
@@ -417,7 +418,7 @@ function deletePhotoFromWishlist(photo, ID) {
 	
 	// DELETE photo from user's wishlist
 	$.ajax({
-		url: "http://dev.m.gatech.edu/d/dlee399/w/photoplacer/c/api/wishlist/" + photo.WID,
+		url: backendUrl + "wishlist/" + photo.WID,
 		context: document.body,
 		type: 'DELETE',
 		//type: 'POST',
@@ -511,4 +512,53 @@ function clearOverlays() {
 	}
 	
 	Markers = [];
+}
+/*
+function setCookies() {
+	// Parse the params
+	var QueryString = parseParams();
+	console.log(QueryString.sessionId);
+	// set the cookie
+	setCookie("PHPSESSID",QueryString.sessionId,1);
+}
+
+function setCookie(c_name,value,exdays)
+{
+	var exdate=new Date();
+	
+	exdate.setDate(exdate.getDate() + exdays);
+	var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+	console.log("setting cookie"+c_value);
+	document.cookie=c_name + "=" + c_value +"; domain=.gatech.edu; path=/;";
+	console.log(document.cookie);
+}
+
+function parseParams() {
+  // This function is anonymous, is executed immediately and 
+  // the return value is assigned to QueryString!
+  var query_string = {};
+  var query = window.location.search.substring(1);
+  var vars = query.split("&");
+  for (var i=0;i<vars.length;i++) {
+    var pair = vars[i].split("=");
+    	// If first entry with this name
+    if (typeof query_string[pair[0]] === "undefined") {
+      query_string[pair[0]] = pair[1];
+    	// If second entry with this name
+    } else if (typeof query_string[pair[0]] === "string") {
+      var arr = [ query_string[pair[0]], pair[1] ];
+      query_string[pair[0]] = arr;
+    	// If third or later entry with this name
+    } else {
+      query_string[pair[0]].push(pair[1]);
+    }
+  } 
+    return query_string;
+}
+*/
+function updateUsername() {
+	$.get('http://dev.m.gatech.edu/user', function(user) {
+		//console.log("current user is " + user);
+		document.getElementById('username').innerHTML = "Logged in as: " + user;
+	});
 }
