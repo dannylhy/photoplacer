@@ -4,6 +4,7 @@ package com.example.myfirstapp;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
@@ -59,11 +60,10 @@ public class MainActivity extends Activity {
     /** Called when the user clicks the Login button */
     public void loginActivity(View view) {
     	// Do something is response to button
-    	Intent intent = new Intent(this, LoginActivity.class);
-    	//EditText editText = (EditText) findViewById(R.id.editText1);
-    	//String message = editText.getText().toString();
-    	//intent.putExtra(EXTRA_MESSAGE,message);
-    	startActivity(intent);
+    	//Intent intent = new Intent(this, LoginActivity.class);
+    	Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://login.gatech.edu/cas/login?service=http%3A%2F%2Fdev.m.gatech.edu%2Flogin%2Fprivate%3Furl%3Dhttp%3A%2F%2Fdev.m.gatech.edu%2Fd%2Fdlee399%2Fw%2Fphotoplacer%2Fc%2Fmain.html%26sessionTransfer%3Dwindow"));
+		startActivity(myIntent);
+    	//startActivity(intent);
     }
     
         

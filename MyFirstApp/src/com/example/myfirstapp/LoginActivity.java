@@ -1,8 +1,11 @@
 package com.example.myfirstapp;
 
-import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
 import android.view.Menu;
+import android.view.View;
 
 public class LoginActivity extends Activity {
 
@@ -19,4 +22,12 @@ public class LoginActivity extends Activity {
 		return true;
 	}
 
+	/** Called when the user clicks the Send button */
+	public void performLogin(View view) {
+	    // Do something in response to button
+		
+		Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://dev.m.gatech.edu/login?url=usercomments://loggedin&sessionTransfer=window"));
+		startActivity(myIntent);
+	}
+	
 }
